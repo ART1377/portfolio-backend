@@ -1,0 +1,37 @@
+{
+  "en": {
+    "name": "Alex Johnson",
+    "initials": "AJ",
+    "roles": [
+      "Frontend Developer",
+      "React Enthusiast",
+      "GSAP Animator"
+    ],
+    "bio": "I create beautiful, responsive web applications with modern technologies... ",
+    "socials": {
+      "github": "https://github.com/your-username",
+      "linkedin": "https://linkedin.com/in/your-profile",
+      "email": "mailto:you@example.com"
+    }
+  },
+  "fa": {
+    "name": "الکس جانسون",
+    "initials": "ا.ج",
+    "roles": [
+      "توسعه‌دهنده فرانت‌اند",
+      "علاقه‌مند به ری‌اکت",
+      "انیماتور GSAP"
+    ],
+    "bio": "من با استفاده از تکنولوژی‌های مدرن اپلیکیشن‌های زیبای واکنش‌گرا می‌سازم... ",
+    "socials": {
+      "github": "https://github.com/your-username",
+      "linkedin": "https://linkedin.com/in/your-profile",
+      "email": "mailto:you@example.com"
+    }
+  },
+  "socials": {
+    "github": "https://github.com/your-username",
+    "linkedin": "https://linkedin.com/in/your-profile",
+    "email": "mailto:you@example.com"
+  }
+}
