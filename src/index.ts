@@ -20,18 +20,39 @@ import adminRoutes from "./routes/admin.route";
 import { jwtAuth } from "./utils/jwtAuth";
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
-app.use(cors({
-  origin: "http://localhost:3000", // your Next.js frontend URL
-  credentials: true, // <-- important for cookies
-}));
+const allowedOrigins = [
+  "http://localhost:3000", // local dev
+  "https://portfolio-frontend-vert-gamma.vercel.app/", // production frontend
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+
+
+// app.use(cors({
+//   origin: "http://localhost:3000", // your Next.js frontend URL
+//   credentials: true, // <-- important for cookies
+// }));
 app.use(express.json());
 
 const uploadsDir = path.join(__dirname, "./uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
 app.use("/uploads", express.static(uploadsDir));
 
 app.use("/api/hero", heroRoutes);
