@@ -4,6 +4,15 @@ import path from "path";
 
 const dataFilePath = path.join(__dirname, "../data/submissions.json");
 
+export interface Submission {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  submittedAt: string;
+}
+
 // Helper: read submissions
 const readSubmissions = () => {
   if (!fs.existsSync(dataFilePath)) {
@@ -49,7 +58,9 @@ export const saveContactSubmission = (req: Request, res: Response) => {
     submissions.push(newSubmission);
     writeSubmissions(submissions);
 
-    res.status(201).json({ message: "Submission saved.", submission: newSubmission });
+    res
+      .status(201)
+      .json({ message: "Submission saved.", submission: newSubmission });
   } catch (error) {
     res.status(500).json({ message: "Failed to save submission." });
   }
@@ -60,7 +71,7 @@ export const deleteContactSubmission = (req: Request, res: Response) => {
     const { id } = req.params;
     const submissions = readSubmissions();
 
-    const index = submissions.findIndex((s) => String(s.id) === id);
+    const index = submissions.findIndex((s: Submission) => String(s.id) === id);
     if (index === -1) {
       return res.status(404).json({ message: "Submission not found." });
     }
@@ -68,7 +79,9 @@ export const deleteContactSubmission = (req: Request, res: Response) => {
     const deleted = submissions.splice(index, 1);
     writeSubmissions(submissions);
 
-    res.status(200).json({ message: "Submission deleted.", deleted: deleted[0] });
+    res
+      .status(200)
+      .json({ message: "Submission deleted.", deleted: deleted[0] });
   } catch (error) {
     res.status(500).json({ message: "Failed to delete submission." });
   }
