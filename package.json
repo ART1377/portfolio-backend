@@ -1,10 +1,11 @@
 {
   "name": "my-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
   },
   "dependencies": {
@@ -33,7 +34,7 @@
     "@types/node": "^24.0.15",
     "nodemon": "^3.1.10",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "keywords": [],
   "author": "",
