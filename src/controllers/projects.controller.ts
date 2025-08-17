@@ -4,7 +4,7 @@ import path from "path";
 import { Lang } from "./about.controller";
 import { v4 as uuidv4 } from "uuid"; // npm install uuid
 
-const filePath = path.join(__dirname, "../data/projects.json");
+const filePath = path.join(process.cwd(), "src/data/projects.json");
 
 const readData = () => JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
