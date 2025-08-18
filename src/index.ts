@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 4000;
 
 const allowedOrigins = [
   "http://localhost:3000", // local dev
-  "https://portfolio-frontend-vert-gamma.vercel.app/", // production frontend
+  "https://portfolio-frontend-vert-gamma.vercel.app", // production frontend
 ];
 
 app.use(

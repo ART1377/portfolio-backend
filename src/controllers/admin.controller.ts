@@ -7,6 +7,8 @@ const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH!;
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const loginController = async (req: Request, res: Response) => {
+  console.log("Login attempt:", req.body);
+  
   const { username, password } = req.body;
 
   if (username !== ADMIN_USERNAME) {
