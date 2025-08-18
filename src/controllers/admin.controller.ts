@@ -24,8 +24,8 @@ export const loginController = async (req: Request, res: Response) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
+      secure: true,
       maxAge: 60 * 60 * 1000, // 1 hour
       path: "/",
     });
@@ -40,8 +40,8 @@ export const loginController = async (req: Request, res: Response) => {
 export const logoutController = (req: Request, res: Response) => {
   res.cookie("token", "", {
     httpOnly: true,
+    sameSite: "none",
     secure: true,
-    sameSite: "strict",
     maxAge: 0,
     path: "/",
   });
