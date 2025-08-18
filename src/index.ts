@@ -40,12 +40,6 @@ app.use(
   })
 );
 
-
-
-// app.use(cors({
-//   origin: "http://localhost:3000", // your Next.js frontend URL
-//   credentials: true, // <-- important for cookies
-// }));
 app.use(express.json());
 
 const uploadsDir = path.join(__dirname, "./uploads");
