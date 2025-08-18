@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import heroData from "../data/hero.json";
 
-const filePath = path.join(__dirname, "../data/hero.json");
+const filePath = path.join(process.cwd(), "src/data/hero.json");
 
 export const getHero = (req: Request, res: Response) => {
   const lang = (req.query.lang as string) || "en";

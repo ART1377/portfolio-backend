@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 
-const filePath = path.join(__dirname, "../data/suggestions.json");
+const filePath = path.join(process.cwd(), "src/data/suggestions.json");
 
 export interface Suggestion {
   id: string;

@@ -3,7 +3,7 @@ import path from "path";
 import { Request, Response } from "express";
 import aboutData from "../data/about.json";
 
-const dataPath = path.join(__dirname, "../data/about.json");
+const dataPath = path.join(process.cwd(), "src/data/about.json");
 export type Lang = "en" | "fa";
 
 export const getAbout = (req: Request, res: Response) => {

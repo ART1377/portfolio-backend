@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { Lang } from "./about.controller";
 
-const filePath = path.join(__dirname, "../data/contactInfo.json");
+const filePath = path.join(process.cwd(), "src/data/contactInfo.json");
 
 export const getContactInfo = (req: Request, res: Response) => {
   try {

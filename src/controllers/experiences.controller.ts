@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { Lang } from "./about.controller";
 
-const dataPath = path.join(__dirname, "../data/experiences.json");
+const dataPath = path.join(process.cwd(), "src/data/experiences.json");
 
 const readData = () => JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
