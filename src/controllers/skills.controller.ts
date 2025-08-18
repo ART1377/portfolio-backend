@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 
-const skillsPath = path.join(__dirname, "../data/skills.json");
+const skillsPath = path.join(process.cwd(), "src/data/skills.json");
 
 export const getSkills = (req: Request, res: Response) => {
   try {
