@@ -40,7 +40,7 @@ export const loginController = async (req: Request, res: Response) => {
 export const logoutController = (req: Request, res: Response) => {
   res.cookie("token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "strict",
     maxAge: 0,
     path: "/",
