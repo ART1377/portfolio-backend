@@ -1,0 +1,47 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Hero {
+  id        Int      @id @default(autoincrement())
+  lang      String   // 'en' or 'fa'
+  name      String
+  initials  String
+  bio       String
+  roles     String   // Stored as JSON string in SQLite
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  socials   Social[] // Relation to Social
+  resumes   Resume[] // Relation to Resume
+
+  @@unique([lang])
+}
+
+model Social {
+  id        Int      @id @default(autoincrement())
+  platform  String   // 'github', 'linkedin', 'email'
+  url       String
+  heroId    Int
+  hero      Hero     @relation(fields: [heroId], references: [id], onDelete: Cascade)
+
+  @@unique([heroId, platform])
+}
+
+model Resume {
+  id        Int      @id @default(autoincrement())
+  lang      String   // 'en' or 'fa'
+  filename  String
+  path      String
+  heroId    Int
+  hero      Hero     @relation(fields: [heroId], references: [id], onDelete: Cascade)
+
+  @@unique([lang])
+}

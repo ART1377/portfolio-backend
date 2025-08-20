@@ -1,26 +1,48 @@
 import { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
-import heroData from "../data/hero.json";
+import { PrismaClient } from "@prisma/client";
 
-const filePath = path.join(process.cwd(), "src/data/hero.json");
+const prisma = new PrismaClient();
 
-export const getHero = (req: Request, res: Response) => {
-  const lang = (req.query.lang as string) || "en";
-  
-  if (!["en", "fa"].includes(lang))
-    return res.status(400).json({ message: "Invalid language" });
+export const getHero = async (req: Request, res: Response) => {
+  try {
+    const lang = (req.query.lang as string) || "en";
 
-  const localized = {
-    ...heroData[lang as "en" | "fa"],
-    socials: heroData.socials,
-  };
+    if (!["en", "fa"].includes(lang)) {
+      return res.status(400).json({ message: "Invalid language" });
+    }
 
-  res.json(localized);
+    const hero = await prisma.hero.findUnique({
+      where: { lang },
+      include: {
+        socials: true,
+        resumes: true,
+      },
+    });
+
+    if (!hero) {
+      return res.status(404).json({ message: "Hero data not found" });
+    }
+
+    // Transform the data to match your frontend expectations
+    const localized = {
+      name: hero.name,
+      initials: hero.initials,
+      roles: hero.roles,
+      bio: hero.bio,
+      socials: hero.socials.reduce((acc, social) => {
+        acc[social.platform] = social.url;
+        return acc;
+      }, {} as Record<string, string>),
+    };
+
+    res.json(localized);
+  } catch (error) {
+    console.error("Error fetching hero data:", error);
+    res.status(500).json({ error: "Failed to fetch hero data" });
+  }
 };
 
-// In controllers/heroController.ts
-export const updateHero = (req: Request, res: Response) => {
+export const updateHero = async (req: Request, res: Response) => {
   try {
     const updated = req.body;
     const lang = updated?.lang as "en" | "fa";
@@ -29,14 +51,47 @@ export const updateHero = (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid or missing language" });
     }
 
-    const fileData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    fileData[lang] = updated;
-    delete fileData[lang].lang; // remove 'lang' if present in body
+    // Upsert hero data
+    const hero = await prisma.hero.upsert({
+      where: { lang },
+      update: {
+        name: updated.name,
+        initials: updated.initials,
+        bio: updated.bio,
+        roles: updated.roles,
+      },
+      create: {
+        lang,
+        name: updated.name,
+        initials: updated.initials,
+        bio: updated.bio,
+        roles: updated.roles,
+      },
+    });
 
-    fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2));
+    // Update socials if provided
+    if (updated.socials) {
+      for (const [platform, url] of Object.entries(updated.socials)) {
+        await prisma.social.upsert({
+          where: {
+            heroId_platform: {
+              heroId: hero.id,
+              platform,
+            },
+          },
+          update: { url: url as string },
+          create: {
+            platform,
+            url: url as string,
+            heroId: hero.id,
+          },
+        });
+      }
+    }
 
     res.json({ message: "Hero data updated successfully." });
   } catch (err) {
+    console.error("Error updating hero data:", err);
     res.status(500).json({ error: "Failed to update hero data." });
   }
 };
