@@ -1,41 +1,108 @@
 import { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
+import { PrismaClient } from "@prisma/client";
 
-const skillsPath = path.join(process.cwd(), "src/data/skills.json");
+const prisma = new PrismaClient();
 
-export const getSkills = (req: Request, res: Response) => {
+export const getSkills = async (req: Request, res: Response) => {
   try {
-    const raw = fs.readFileSync(skillsPath, "utf-8");
-    
-    const data = JSON.parse(raw);
     const lang = (req.query.lang as string) || "en";
-    const localizedSkills = data[lang];
-    if (!localizedSkills) {
-      console.warn(`No data found for lang=${lang}`);
-      return res.status(404).json({ message: `No data for lang=${lang}` });
+
+    if (!["en", "fa"].includes(lang)) {
+      return res.status(400).json({ message: "Invalid language" });
     }
 
-    res.json(localizedSkills);
+    const skillData = await prisma.skill.findUnique({
+      where: { lang },
+      include: {
+        categories: {
+          include: {
+            skills: true,
+          },
+        },
+      },
+    });
+
+    if (!skillData) {
+      return res.status(404).json({ message: "Skill data not found" });
+    }
+
+    // Transform the data to match your frontend expectations
+    const localized = skillData.categories.map((category) => ({
+      title: category.title,
+      skills: category.skills.map((skill) => ({
+        name: skill.name,
+        level: skill.level,
+      })),
+    }));
+
+    res.json(localized);
   } catch (error) {
-    console.error("Error reading skills file:", error);
+    console.error("Error fetching skills:", error);
     res.status(500).json({ message: "Failed to fetch skills", error });
   }
 };
 
-
-export const updateSkills = (req: Request, res: Response) => {
+export const updateSkills = async (req: Request, res: Response) => {
   try {
     const lang = (req.query.lang as string) || "en";
-    const raw = fs.readFileSync(skillsPath, "utf-8");
-    const data = JSON.parse(raw);
+    const newSkills = req.body;
 
-    // Update only the selected language
-    data[lang] = req.body;
+    if (!["en", "fa"].includes(lang)) {
+      return res.status(400).json({ message: "Invalid language" });
+    }
 
-    fs.writeFileSync(skillsPath, JSON.stringify(data, null, 2));
+    // Use a transaction to ensure all operations succeed or fail together
+    await prisma.$transaction(async (tx) => {
+      // Upsert the main skill record
+      const skill = await tx.skill.upsert({
+        where: { lang },
+        update: {},
+        create: { lang },
+      });
+
+      // Update categories and skills
+      if (newSkills && Array.isArray(newSkills)) {
+        // Delete existing categories and their skills
+        const existingCategories = await tx.skillCategory.findMany({
+          where: { skillId: skill.id },
+        });
+
+        for (const category of existingCategories) {
+          await tx.skillItem.deleteMany({
+            where: { skillCategoryId: category.id },
+          });
+        }
+
+        await tx.skillCategory.deleteMany({
+          where: { skillId: skill.id },
+        });
+
+        // Create new categories and skills
+        for (const categoryData of newSkills) {
+          const newCategory = await tx.skillCategory.create({
+            data: {
+              title: categoryData.title,
+              skillId: skill.id,
+            },
+          });
+
+          // Create skills for this category
+          if (categoryData.skills && categoryData.skills.length > 0) {
+            await tx.skillItem.createMany({
+              data: categoryData.skills.map((skillItem: any) => ({
+                name: skillItem.name,
+                level: skillItem.level,
+                skillCategoryId: newCategory.id,
+              })),
+            });
+          }
+        }
+      }
+    });
+
     res.status(200).json({ message: "Skills updated successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to update skills", error: err });
+  } catch (error) {
+    console.error("Error updating skills:", error);
+    res.status(500).json({ message: "Failed to update skills", error });
   }
 };

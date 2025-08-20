@@ -1,64 +1,55 @@
-// scripts/migrateHeroData.ts
+// scripts/migrateSkillData.ts
 import { PrismaClient } from "@prisma/client";
-import heroData from "../src/data/hero.json";
+import skillData from "../src/data/skills.json";
 
 const prisma = new PrismaClient();
 
-async function migrateHeroData() {
+async function migrateSkillData() {
   try {
-    console.log("Starting hero data migration...");
+    console.log("Starting skill data migration...");
 
     for (const lang of ["en", "fa"] as const) {
-      const data = heroData[lang];
-      const socials = heroData.socials;
+      const data = skillData[lang];
 
-      // Create hero record
-      const hero = await prisma.hero.upsert({
+      // Create skill record
+      const skill = await prisma.skill.upsert({
         where: { lang },
-        update: {
-          name: data.name,
-          initials: data.initials,
-          bio: data.bio,
-          roles: data.roles.join(","),
-        },
-        create: {
-          lang,
-          name: data.name,
-          initials: data.initials,
-          bio: data.bio,
-          roles: data.roles.join(","),
-        },
+        update: {},
+        create: { lang }
       });
 
-      console.log(`Hero data for ${lang} migrated successfully.`);
+      // Migrate categories and skills
+      if (data && data.length > 0) {
+        for (const categoryData of data) {
+          const newCategory = await prisma.skillCategory.create({
+            data: {
+              title: categoryData.title,
+              skillId: skill.id
+            }
+          });
 
-      // Create social records
-      for (const [platform, url] of Object.entries(socials)) {
-        await prisma.social.upsert({
-          where: {
-            heroId_platform: {
-              heroId: hero.id,
-              platform,
-            },
-          },
-          update: { url },
-          create: {
-            platform,
-            url,
-            heroId: hero.id,
-          },
-        });
+          // Migrate skills for this category
+          if (categoryData.skills && categoryData.skills.length > 0) {
+            await prisma.skillItem.createMany({
+              data: categoryData.skills.map((skillItem: any) => ({
+                name: skillItem.name,
+                level: skillItem.level,
+                skillCategoryId: newCategory.id
+              }))
+            });
+          }
+        }
       }
 
-      console.log(`Social data for ${lang} migrated successfully.`);
+      console.log(`Skill data for ${lang} migrated successfully.`);
     }
 
-    console.log("Migration completed successfully!");
+    console.log("Skill data migration completed successfully!");
   } catch (error) {
-    console.error("Migration failed:", error);
+    console.error("Skill data migration failed:", error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-migrateHeroData();
+migrateSkillData();

@@ -1,49 +1,120 @@
-import fs from "fs";
-import path from "path";
 import { Request, Response } from "express";
-import aboutData from "../data/about.json";
+import { PrismaClient } from "@prisma/client";
 
-const dataPath = path.join(process.cwd(), "src/data/about.json");
-export type Lang = "en" | "fa";
+const prisma = new PrismaClient();
 
-export const getAbout = (req: Request, res: Response) => {
-  const lang = (req.query.lang as string) || "en";
-  if (!["en", "fa"].includes(lang))
-    return res.status(400).json({ message: "Invalid language" });
+export const getAbout = async (req: Request, res: Response) => {
+  try {
+    const lang = (req.query.lang as string) || "en";
 
-  const localized = aboutData[lang as Lang];
-  if (!localized)
-    return res.status(404).json({ message: "About data not found" });
+    if (!["en", "fa"].includes(lang)) {
+      return res.status(400).json({ message: "Invalid language" });
+    }
 
-  res.json(localized);
+    const about = await prisma.about.findUnique({
+      where: { lang },
+      include: {
+        descriptions: true,
+        skills: true,
+        features: true,
+      },
+    });
+
+    if (!about) {
+      return res.status(404).json({ message: "About data not found" });
+    }
+
+    // Transform the data to match your frontend expectations
+    const localized = {
+      description: about.descriptions.map((d) => d.content),
+      skills: about.skills.map((s) => s.name),
+      features: about.features.map((f) => ({
+        icon: f.icon,
+        title: f.title,
+        description: f.description,
+      })),
+    };
+
+    res.json(localized);
+  } catch (error) {
+    console.error("Error fetching about data:", error);
+    res.status(500).json({ error: "Failed to fetch about data" });
+  }
 };
 
-export const updateAbout = (req: Request, res: Response) => {
-  const lang = (req.query.lang as Lang) || "en";
-  if (!["en", "fa"].includes(lang))
-    return res.status(400).json({ message: "Invalid language" });
+export const updateAbout = async (req: Request, res: Response) => {
+  try {
+    const lang = (req.query.lang as "en" | "fa") || "en";
 
-  const updatedLangData = req.body;
-
-  fs.readFile(dataPath, "utf8", (readErr, fileContent) => {
-    if (readErr) {
-      return res.status(500).json({ message: "Failed to read data" });
+    if (!["en", "fa"].includes(lang)) {
+      return res.status(400).json({ message: "Invalid language" });
     }
 
-    let fullData: Record<Lang, any>;
-    try {
-      fullData = JSON.parse(fileContent);
-    } catch (parseErr) {
-      return res.status(500).json({ message: "Invalid JSON format" });
-    }
+    const updatedData = req.body;
 
-    fullData[lang] = updatedLangData;
+    // Use a transaction to ensure all operations succeed or fail together
+    await prisma.$transaction(async (tx) => {
+      // Upsert the main about record
+      const about = await tx.about.upsert({
+        where: { lang },
+        update: {},
+        create: { lang },
+      });
 
-    fs.writeFile(dataPath, JSON.stringify(fullData, null, 2), (err) => {
-      if (err) {
-        return res.status(500).json({ message: "Failed to write data" });
+      // Update descriptions
+      if (updatedData.description) {
+        // Delete existing descriptions
+        await tx.aboutDescription.deleteMany({
+          where: { aboutId: about.id },
+        });
+
+        // Create new descriptions
+        await tx.aboutDescription.createMany({
+          data: updatedData.description.map((content: string) => ({
+            content,
+            aboutId: about.id,
+          })),
+        });
       }
-      res.status(200).json({ message: "About data updated" });
+
+      // Update skills
+      if (updatedData.skills) {
+        // Delete existing skills
+        await tx.aboutSkill.deleteMany({
+          where: { aboutId: about.id },
+        });
+
+        // Create new skills
+        await tx.aboutSkill.createMany({
+          data: updatedData.skills.map((name: string) => ({
+            name,
+            aboutId: about.id,
+          })),
+        });
+      }
+
+      // Update features
+      if (updatedData.features) {
+        // Delete existing features
+        await tx.aboutFeature.deleteMany({
+          where: { aboutId: about.id },
+        });
+
+        // Create new features
+        await tx.aboutFeature.createMany({
+          data: updatedData.features.map((feature: any) => ({
+            icon: feature.icon,
+            title: feature.title,
+            description: feature.description,
+            aboutId: about.id,
+          })),
+        });
+      }
     });
-  });
+
+    res.status(200).json({ message: "About data updated successfully" });
+  } catch (error) {
+    console.error("Error updating about data:", error);
+    res.status(500).json({ error: "Failed to update about data" });
+  }
 };
