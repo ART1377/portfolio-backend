@@ -1,21 +1,50 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET environment variable is required");
+  process.exit(1);
+}
 
-export function jwtAuth(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+// Extend Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
   }
+}
 
-  const token = authHeader.split(" ")[1];
+export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    (req as any).user = decoded;
+    const token = req.cookies?.token;
+
+    if (!token) {
+      return res.status(401).json({
+        errorCode: "NO_TOKEN",
+        message: "Access token is required",
+      });
+    }
+
+    // Decode and verify token using jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+
+    req.user = payload; // attach payload to request
     next();
-  } catch {
-    return res.status(403).json({ message: "Invalid or expired token" });
+  } catch (err: any) {
+    console.error("JWT verification error:", err);
+
+    if (err.code === "ERR_JWT_EXPIRED") {
+      return res.status(403).json({
+        errorCode: "TOKEN_EXPIRED",
+        message: "Token has expired",
+      });
+    }
+
+    return res.status(403).json({
+      errorCode: "INVALID_TOKEN",
+      message: "Token is invalid",
+    });
   }
 }

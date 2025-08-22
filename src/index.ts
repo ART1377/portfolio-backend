@@ -4,6 +4,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import path from "path";
+import cookieParser from "cookie-parser";
 import heroRoutes from "./routes/hero.route";
 import aboutRoutes from "./routes/about.route";
 import skillsRoutes from "./routes/skills.route";
@@ -41,6 +42,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cookieParser()); // Add cookie parser middleware
 
 const uploadsDir = path.join(__dirname, "./uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -65,11 +67,8 @@ app.use("/api/suggestions", suggestionsRoutes);
 app.use("/api/auth", adminRoutes);
 
 // Everything else under /api/admin is protected
-app.use("/api/admin", jwtAuth);
+// app.use("/api/admin", jwtAuth);
 
-
-// admin
-// app.use("/api/admin", basicAuth);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);

@@ -19,6 +19,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "i18next-resources-to-backend": "^1.2.1",
+    "jose": "^6.0.13",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "next-i18next": "^15.4.2",
