@@ -1,8 +1,5 @@
-// scripts/migrateSkillData.ts
-import { PrismaClient } from "@prisma/client";
 import skillData from "../src/data/skills.json";
-
-const prisma = new PrismaClient();
+import { prisma } from "../src/lib/helper/prisma";
 
 async function migrateSkillData() {
   try {

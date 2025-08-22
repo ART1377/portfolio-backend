@@ -2,10 +2,8 @@
 import { Router } from "express";
 import { getHero, updateHero } from "../controllers/hero.controller";
 import { upload } from "../middlewares/upload";
-import { PrismaClient } from "@prisma/client";
 import { downloadResume, uploadResume } from "../controllers/resume.controller";
 
-const prisma = new PrismaClient();
 const router = Router();
 
 router.get("/", getHero);
