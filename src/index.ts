@@ -47,7 +47,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-app.use("/uploads", express.static(uploadsDir));
+app.use("/api/uploads", express.static(uploadsDir));
 
 app.use("/api/hero", heroRoutes);
 app.use("/api/about", aboutRoutes);

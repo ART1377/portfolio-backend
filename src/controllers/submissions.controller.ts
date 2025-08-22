@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
+import { PrismaClient } from "@prisma/client";
 
-const dataFilePath = path.join(process.cwd(), "src/data/submissions.json");
+const prisma = new PrismaClient();
 
 export interface Submission {
   id: number;
@@ -13,30 +12,32 @@ export interface Submission {
   submittedAt: string;
 }
 
-// Helper: read submissions
-const readSubmissions = () => {
-  if (!fs.existsSync(dataFilePath)) {
-    fs.writeFileSync(dataFilePath, JSON.stringify([]));
-  }
-  const fileData = fs.readFileSync(dataFilePath, "utf-8");
-  return JSON.parse(fileData);
-};
-
-// Helper: write submissions
-const writeSubmissions = (data: any[]) => {
-  fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-};
-
-export const getContactSubmissions = (req: Request, res: Response) => {
+export const getContactSubmissions = async (req: Request, res: Response) => {
   try {
-    const submissions = readSubmissions();
-    res.json(submissions);
+    const submissions = await prisma.contactSubmission.findMany({
+      orderBy: {
+        submittedAt: "desc",
+      },
+    });
+
+    // Transform the data to match your frontend expectations
+    const transformedSubmissions = submissions.map((submission) => ({
+      id: submission.id,
+      name: submission.name,
+      email: submission.email,
+      subject: submission.subject,
+      message: submission.message,
+      submittedAt: submission.submittedAt.toISOString(),
+    }));
+
+    res.json(transformedSubmissions);
   } catch (error) {
+    console.error("Error fetching submissions:", error);
     res.status(500).json({ message: "Failed to read submissions." });
   }
 };
 
-export const saveContactSubmission = (req: Request, res: Response) => {
+export const saveContactSubmission = async (req: Request, res: Response) => {
   try {
     const { name, email, subject, message } = req.body;
 
@@ -44,45 +45,73 @@ export const saveContactSubmission = (req: Request, res: Response) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const submissions = readSubmissions();
+    const newSubmission = await prisma.contactSubmission.create({
+      data: {
+        name,
+        email,
+        subject,
+        message,
+        submittedAt: new Date(),
+      },
+    });
 
-    const newSubmission = {
-      id: Date.now(), // simple unique id
-      name,
-      email,
-      subject,
-      message,
-      submittedAt: new Date().toISOString(),
+    // Transform the response to match frontend expectations
+    const transformedSubmission = {
+      id: newSubmission.id,
+      name: newSubmission.name,
+      email: newSubmission.email,
+      subject: newSubmission.subject,
+      message: newSubmission.message,
+      submittedAt: newSubmission.submittedAt.toISOString(),
     };
 
-    submissions.push(newSubmission);
-    writeSubmissions(submissions);
-
-    res
-      .status(201)
-      .json({ message: "Submission saved.", submission: newSubmission });
+    res.status(201).json({
+      message: "Submission saved.",
+      submission: transformedSubmission,
+    });
   } catch (error) {
+    console.error("Error saving submission:", error);
     res.status(500).json({ message: "Failed to save submission." });
   }
 };
 
-export const deleteContactSubmission = (req: Request, res: Response) => {
+export const deleteContactSubmission = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const submissions = readSubmissions();
+    const submissionId = parseInt(id);
 
-    const index = submissions.findIndex((s: Submission) => String(s.id) === id);
-    if (index === -1) {
+    if (isNaN(submissionId)) {
+      return res.status(400).json({ message: "Invalid submission ID." });
+    }
+
+    const submission = await prisma.contactSubmission.findUnique({
+      where: { id: submissionId },
+    });
+
+    if (!submission) {
       return res.status(404).json({ message: "Submission not found." });
     }
 
-    const deleted = submissions.splice(index, 1);
-    writeSubmissions(submissions);
+    const deletedSubmission = await prisma.contactSubmission.delete({
+      where: { id: submissionId },
+    });
 
-    res
-      .status(200)
-      .json({ message: "Submission deleted.", deleted: deleted[0] });
+    // Transform the response to match frontend expectations
+    const transformedSubmission = {
+      id: deletedSubmission.id,
+      name: deletedSubmission.name,
+      email: deletedSubmission.email,
+      subject: deletedSubmission.subject,
+      message: deletedSubmission.message,
+      submittedAt: deletedSubmission.submittedAt.toISOString(),
+    };
+
+    res.status(200).json({
+      message: "Submission deleted.",
+      deleted: transformedSubmission,
+    });
   } catch (error) {
+    console.error("Error deleting submission:", error);
     res.status(500).json({ message: "Failed to delete submission." });
   }
 };

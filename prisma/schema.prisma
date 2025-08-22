@@ -243,7 +243,6 @@ model SkillItem {
 }
 
 // prisma/schema.prisma
-
 model ContactSubmission {
   id          Int      @id @default(autoincrement())
   name        String
@@ -258,10 +257,6 @@ model ContactSubmission {
 }
 
 // prisma/schema.prisma
-
-// prisma/schema.prisma
-// prisma/schema.prisma
-
 model Suggestion {
   id        String   @id @default(cuid())
   name      String   @unique(map: "suggestion_name_unique") // Custom constraint name
