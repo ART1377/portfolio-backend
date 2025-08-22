@@ -1,62 +1,52 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Hero {
   id        Int      @id @default(autoincrement())
-  lang      String   // 'en' or 'fa'
+  lang      String   @unique
   name      String
   initials  String
   bio       String
-  roles     String   // Stored as JSON string in SQLite
+  roles     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  socials   Social[] // Relation to Social
-  resumes   Resume[] // Relation to Resume
-
-  @@unique([lang])
+  resumes   Resume[]
+  socials   Social[]
 }
 
 model Social {
-  id        Int      @id @default(autoincrement())
-  platform  String   // 'github', 'linkedin', 'email'
-  url       String
-  heroId    Int
-  hero      Hero     @relation(fields: [heroId], references: [id], onDelete: Cascade)
+  id       Int    @id @default(autoincrement())
+  platform String
+  url      String
+  heroId   Int
+  hero     Hero   @relation(fields: [heroId], references: [id], onDelete: Cascade)
 
   @@unique([heroId, platform])
 }
 
 model Resume {
-  id        Int      @id @default(autoincrement())
-  lang      String   // 'en' or 'fa'
-  filename  String
-  path      String
-  heroId    Int
-  hero      Hero     @relation(fields: [heroId], references: [id], onDelete: Cascade)
-
-  @@unique([lang])
+  id       Int    @id @default(autoincrement())
+  lang     String @unique
+  filename String
+  path     String
+  heroId   Int
+  hero     Hero   @relation(fields: [heroId], references: [id], onDelete: Cascade)
 }
 
 model About {
-  id        Int      @id @default(autoincrement())
-  lang      String   // 'en' or 'fa'
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id           Int                @id @default(autoincrement())
+  lang         String             @unique
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
   descriptions AboutDescription[]
-  skills       AboutSkill[]
   features     AboutFeature[]
-
-  @@unique([lang])
+  skills       AboutSkill[]
 }
 
 model AboutDescription {
@@ -88,70 +78,59 @@ model AboutFeature {
   @@unique([aboutId, title])
 }
 
-// prisma/schema.prisma
-
 model ContactInfo {
-  id        Int      @id @default(autoincrement())
-  lang      String   // 'en' or 'fa'
+  id        Int             @id @default(autoincrement())
+  lang      String          @unique
   email     String
   phone     String
   location  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  socials ContactSocial[]
-
-  @@unique([lang])
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  socials   ContactSocial[]
 }
 
 model ContactSocial {
-  id           Int         @id @default(autoincrement())
-  platform     String      // 'github', 'linkedin', 'telegram'
-  url          String
+  id            Int         @id @default(autoincrement())
+  platform      String
+  url           String
   contactInfoId Int
   contactInfo   ContactInfo @relation(fields: [contactInfoId], references: [id], onDelete: Cascade)
 
   @@unique([contactInfoId, platform])
 }
 
-// prisma/schema.prisma
-
 model Experience {
-  id          Int      @id @default(autoincrement())
-  lang        String   // 'en' or 'fa'
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  experiences ExperienceItem[]
-  education   EducationItem[]
+  id          Int              @id @default(autoincrement())
+  lang        String           @unique
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   courses     CourseItem[]
-
-  @@unique([lang])
+  education   EducationItem[]
+  experiences ExperienceItem[]
 }
 
 model ExperienceItem {
-  id           Int      @id @default(autoincrement())
+  id           Int                    @id @default(autoincrement())
   title        String
   company      String
   period       String
   description  String
   experienceId Int
-  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
-
+  experience   Experience             @relation(fields: [experienceId], references: [id], onDelete: Cascade)
   technologies ExperienceTechnology[]
 }
 
 model ExperienceTechnology {
-  id               Int             @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   name             String
   experienceItemId Int
-  experienceItem   ExperienceItem  @relation(fields: [experienceItemId], references: [id], onDelete: Cascade)
+  experienceItem   ExperienceItem @relation(fields: [experienceItemId], references: [id], onDelete: Cascade)
 
   @@unique([experienceItemId, name])
 }
 
 model EducationItem {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   degree       String
   school       String
   period       String
@@ -161,7 +140,7 @@ model EducationItem {
 }
 
 model CourseItem {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   name         String
   org          String
   year         String
@@ -171,63 +150,51 @@ model CourseItem {
   @@unique([experienceId, name, org])
 }
 
-// prisma/schema.prisma
-
 model Project {
-  id          Int      @id @default(autoincrement())
-  lang        String   // 'en' or 'fa'
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  projects ProjectItem[]
-
-  @@unique([lang])
+  id        Int           @id @default(autoincrement())
+  lang      String        @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  projects  ProjectItem[]
 }
 
 model ProjectItem {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  image       String?
-  liveUrl     String?
-  githubUrl   String?
-  projectId   Int
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
+  id           Int                 @id @default(autoincrement())
+  title        String
+  description  String
+  image        String?
+  liveUrl      String?
+  githubUrl    String?
+  projectId    Int
+  project      Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
   technologies ProjectTechnology[]
 
   @@unique([projectId, title])
 }
 
 model ProjectTechnology {
-  id           Int         @id @default(autoincrement())
-  name         String
+  id            Int         @id @default(autoincrement())
+  name          String
   projectItemId Int
   projectItem   ProjectItem @relation(fields: [projectItemId], references: [id], onDelete: Cascade)
 
   @@unique([projectItemId, name])
 }
 
-// prisma/schema.prisma
-
 model Skill {
-  id        Int      @id @default(autoincrement())
-  lang      String   // 'en' or 'fa'
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id         Int             @id @default(autoincrement())
+  lang       String          @unique
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
   categories SkillCategory[]
-
-  @@unique([lang])
 }
 
 model SkillCategory {
-  id      Int    @id @default(autoincrement())
+  id      Int         @id @default(autoincrement())
   title   String
   skillId Int
-  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  skills SkillItem[]
+  skill   Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skills  SkillItem[]
 
   @@unique([skillId, title])
 }
@@ -235,14 +202,13 @@ model SkillCategory {
 model SkillItem {
   id              Int           @id @default(autoincrement())
   name            String
-  level           Int           @default(0) // 0-100
+  level           Int           @default(0)
   skillCategoryId Int
   skillCategory   SkillCategory @relation(fields: [skillCategoryId], references: [id], onDelete: Cascade)
 
   @@unique([skillCategoryId, name])
 }
 
-// prisma/schema.prisma
 model ContactSubmission {
   id          Int      @id @default(autoincrement())
   name        String
@@ -256,10 +222,9 @@ model ContactSubmission {
   @@map("contact_submissions")
 }
 
-// prisma/schema.prisma
 model Suggestion {
   id        String   @id @default(cuid())
-  name      String   @unique(map: "suggestion_name_unique") // Custom constraint name
+  name      String   @unique(map: "suggestion_name_unique")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
