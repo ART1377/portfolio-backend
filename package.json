@@ -4,9 +4,15 @@
   "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc && cp -r src/data dist/data"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc && prisma generate",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:seed:production": "ts-node prisma/seed-production.ts",
+    "prisma:studio": "prisma studio",
+    "railway:build": "npm run build && npm run prisma:generate",
+    "railway:start": "npm run prisma:migrate:deploy && npm run prisma:seed:production && npm run start"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
