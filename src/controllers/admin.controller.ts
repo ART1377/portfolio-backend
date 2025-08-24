@@ -50,13 +50,17 @@ export const loginController = async (req: Request, res: Response) => {
     // });
 
     // Also make sure your cookie settings work for cross-origin
+    // In your loginController
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "none", // Important for cross-origin
-      secure: true, // Must be true when sameSite is none
-      maxAge: 60 * 60 * 1000,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true, // ← MUST be true for cross-origin and sameSite=none
+      maxAge: 60 * 60 * 1000, // 1 hour
       path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, // Optional: set your domain
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".vercel.app" // ← Use .vercel.app for all Vercel subdomains
+          : "localhost", // ← For local development
     });
 
     return res.json({
