@@ -13,7 +13,7 @@
     "prisma:studio": "prisma studio",
     "prisma:reset": "prisma migrate reset",
     "postinstall": "prisma generate && npm run build",
-    "seed:prod": "node dist/prisma/seed.js"
+    "migrate:neon": "DATABASE_URL=$npm_config_db_url npx prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
