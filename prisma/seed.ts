@@ -27,7 +27,7 @@ const seedData = {
   },
 };
 
-async function main() {
+export default async function seedDataFn() {
   // Seed English hero
   await prisma.hero.upsert({
     where: { lang: "en" },
@@ -67,13 +67,13 @@ async function main() {
   });
 }
 
-main()
-  .then(async () => {
-    console.log("✅ Database seeded");
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// seedDataFn()
+//   .then(async () => {
+//     console.log("✅ Database seeded");
+//     await prisma.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prisma.$disconnect();
+//     process.exit(1);
+//   });
