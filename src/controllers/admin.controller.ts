@@ -57,10 +57,6 @@ export const loginController = async (req: Request, res: Response) => {
       secure: true, // ← MUST be true for cross-origin and sameSite=none
       maxAge: 60 * 60 * 1000, // 1 hour
       path: "/",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? ".vercel.app" // ← Use .vercel.app for all Vercel subdomains
-          : "localhost", // ← For local development
     });
 
     return res.json({
