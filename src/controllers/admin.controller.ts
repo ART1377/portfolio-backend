@@ -54,7 +54,7 @@ export const loginController = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: true, // ← MUST be true for cross-origin and sameSite=none
+      secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 1000, // 1 hour
       path: "/",
     });

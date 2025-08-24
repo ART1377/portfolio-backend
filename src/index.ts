@@ -47,22 +47,22 @@ app.use(
   })
 );
 
-// In your Express app (after setting up CORS)
-app.use((req, res, next) => {
-  // Allow credentials
-  res.header("Access-Control-Allow-Credentials", "true");
+// // In your Express app (after setting up CORS)
+// app.use((req, res, next) => {
+//   // Allow credentials
+//   res.header("Access-Control-Allow-Credentials", "true");
 
-  // Allow specific headers test
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
+//   // Allow specific headers test
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+//   );
 
-  // Allow specific methods
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   // Allow specific methods
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
-  next();
-});
+//   next();
+// });
 
 
 
