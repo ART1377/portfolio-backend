@@ -26,18 +26,24 @@ const PORT = process.env.PORT || 4000;
 const allowedOrigins = [
   "http://localhost:3000", // local dev
   "https://portfolio-frontend-vert-gamma.vercel.app", // production frontend
+  "https://portfolio-frontend-git-main-art1377s-projects.vercel.app",
+  "https://portfolio-frontend-707er2qg2-art1377s-projects.vercel.app",
 ];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true,
+    credentials: true, // This is crucial!
+    exposedHeaders: ["set-cookie"], // Optional: if you need to access set-cookie header
   })
 );
 
@@ -68,7 +74,6 @@ app.use("/api/auth", adminRoutes);
 
 // Everything else under /api/admin is protected
 // app.use("/api/admin", jwtAuth);
-
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
