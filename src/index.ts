@@ -12,7 +12,6 @@ import projectsRoutes from "./routes/projects.route";
 import experiencesRoutes from "./routes/experiences.route";
 import submissionsRoutes from "./routes/submissions.route";
 import uploadImageRoutes from "./routes/image.route";
-import seedDataFn from '../prisma/seed'
 
 // admin
 import contactInfoRoutes from "./routes/contactInfo.route";
@@ -51,16 +50,6 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 app.use("/api/uploads", express.static(uploadsDir));
-
-app.post("/run-seed", async (req, res) => {
-  try {
-    await seedDataFn();
-    res.send("✅ Seed completed successfully");
-  } catch (err) {
-    console.error("Seed failed:", err);
-    res.status(500).send("❌ Seed failed");
-  }
-});
 
 app.use("/api/hero", heroRoutes);
 app.use("/api/about", aboutRoutes);
