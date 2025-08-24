@@ -6,12 +6,14 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc && cp -r src/data dist/data",
+    "build": "tsc && cp -r src/data dist/data && cp -r src/uploads dist/uploads",
     "check-types": "tsc --noEmit",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:reset": "prisma migrate reset"
+    "prisma:reset": "prisma migrate reset",
+    "postinstall": "prisma generate && npm run build",
+    "seed:prod": "node dist/prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
