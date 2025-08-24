@@ -4,10 +4,14 @@
   "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {
+    "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc && prisma generate",
-    "start": "npx prisma migrate deploy && node dist/index.js",
-    "seed": "ts-node prisma/seed.ts"
+    "build": "tsc && cp -r src/data dist/data",
+    "check-types": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:reset": "prisma migrate reset"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
@@ -16,15 +20,9 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.21.2",
-    "i18next": "^25.3.2",
-    "i18next-browser-languagedetector": "^8.2.0",
-    "i18next-http-backend": "^3.0.2",
-    "i18next-resources-to-backend": "^1.2.1",
     "jose": "^6.0.13",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
-    "next-i18next": "^15.4.2",
-    "react-i18next": "^15.6.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
@@ -35,6 +33,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.3.0",
+    "@types/uuid": "^9.0.8",
     "nodemon": "^3.1.10",
     "prisma": "^6.14.0",
     "ts-node-dev": "^2.0.0",
