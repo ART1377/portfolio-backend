@@ -41,27 +41,20 @@ export const loginController = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
 
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    //   secure: process.env.NODE_ENV === "production",
-    //   maxAge: 60 * 60 * 1000, // 1 hour
-    //   path: "/",
-    // });
-
-    // Also make sure your cookie settings work for cross-origin
-    // In your loginController
+    // Set HTTP-only cookie (for automatic auth in same domain)
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,
       path: "/",
     });
 
+    // Also return the token in response (for frontend to store)
     return res.json({
       success: true,
       message: "Login successful",
+      token: token, // ← Bearer token for frontend storage
     });
   } catch (error) {
     console.error("Login error:", error);
