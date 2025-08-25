@@ -17,7 +17,10 @@ declare global {
 
 export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const token = req.cookies?.token;
+    const authHeader = req.headers["authorization"];
+    const token = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
 
     if (!token) {
       return res.status(401).json({
@@ -26,11 +29,10 @@ export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
       });
     }
 
-    // Decode and verify token using jose
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
 
-    req.user = payload; // attach payload to request
+    req.user = payload;
     next();
   } catch (err: any) {
     console.error("JWT verification error:", err);

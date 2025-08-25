@@ -39,23 +39,14 @@ export const loginController = async (req: Request, res: Response) => {
       });
     }
 
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
+   const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
 
-    // Set HTTP-only cookie (for automatic auth in same domain)
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 1000,
-      path: "/",
-    });
+   return res.json({
+     success: true,
+     message: "Login successful",
+     token, // send back JWT
+   });
 
-    // Also return the token in response (for frontend to store)
-    return res.json({
-      success: true,
-      message: "Login successful",
-      token: token, // ← Bearer token for frontend storage
-    });
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({
