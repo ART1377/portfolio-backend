@@ -39,30 +39,14 @@ export const loginController = async (req: Request, res: Response) => {
       });
     }
 
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
+   const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
 
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    //   secure: process.env.NODE_ENV === "production",
-    //   maxAge: 60 * 60 * 1000, // 1 hour
-    //   path: "/",
-    // });
+   return res.json({
+     success: true,
+     message: "Login successful",
+     token,
+   });
 
-    // Also make sure your cookie settings work for cross-origin
-    // In your loginController
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 1000, // 1 hour
-      path: "/",
-    });
-
-    return res.json({
-      success: true,
-      message: "Login successful",
-    });
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({
