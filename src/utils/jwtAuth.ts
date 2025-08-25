@@ -17,24 +17,34 @@ declare global {
 
 export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({ errorCode: "NO_TOKEN", message: "Token required" });
+    const token = req.cookies?.token;
+
+    if (!token) {
+      return res.status(401).json({
+        errorCode: "NO_TOKEN",
+        message: "Access token is required",
+      });
     }
 
-    const token = authHeader.split(" ")[1];
+    // Decode and verify token using jose
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
 
-    req.user = payload;
+    req.user = payload; // attach payload to request
     next();
   } catch (err: any) {
     console.error("JWT verification error:", err);
+
+    if (err.code === "ERR_JWT_EXPIRED") {
+      return res.status(403).json({
+        errorCode: "TOKEN_EXPIRED",
+        message: "Token has expired",
+      });
+    }
+
     return res.status(403).json({
       errorCode: "INVALID_TOKEN",
-      message: "Token is invalid or expired",
+      message: "Token is invalid",
     });
   }
 }
