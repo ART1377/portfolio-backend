@@ -2,40 +2,32 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
 import cloudinary from "../utils/cloudinary";
-import fs from "fs";
 
-
+// Alternative approach - separate image upload from database update
 export const uploadImage = async (req: Request, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    // Upload file to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "portfolio_uploads", // optional
-      resource_type: "image",
-    });
+    const file = req.file as any;
+    const fileUrl = file.secure_url || file.path;
+    const publicId = file.filename || file.public_id;
 
-    // Remove local file after upload
-    fs.unlinkSync(req.file.path);
-
-    const fileUrl = result.secure_url; // this is the Cloudinary URL
-    const publicId = result.public_id;
-
-    const projectId = req.query.projectId as string;
-    if (projectId) {
-      await prisma.projectItem.update({
-        where: { id: parseInt(projectId) },
-        data: { image: fileUrl, imageId: publicId },
-      });
+    if (!fileUrl) {
+      return res.status(500).json({ error: "Cloudinary upload failed" });
     }
 
-    res.json({ imageUrl: fileUrl, publicId });
+    // Just return the image URL without updating the database
+    // The frontend will handle the database update during the main save operation
+    res.json({ 
+      imageUrl: fileUrl, 
+      publicId,
+      message: "Image uploaded successfully" 
+    });
   } catch (error) {
     console.error("Error uploading image:", error);
     res.status(500).json({ error: "Failed to upload image" });
   }
 };
-
 
 
 export const deleteImage = async (req: Request, res: Response) => {

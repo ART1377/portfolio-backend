@@ -1,17 +1,24 @@
+// middlewares/upload.ts
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer, { FileFilterCallback } from "multer";
+import multer from "multer";
 import cloudinary from "../utils/cloudinary";
-import { Request } from "express";
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async (req: Request, file: Express.Multer.File) => {
+  params: async (req, file) => {
     return {
-      folder: "portfolio_uploads", // Folder on Cloudinary
-      resource_type: "auto", // Images, PDFs, etc.
-      public_id: `${file.fieldname}-${Date.now()}`, // Unique name
+      folder: "portfolio_uploads",
+      resource_type: "auto",
+      public_id: `${file.fieldname}-${Date.now()}-${Math.round(
+        Math.random() * 1e9
+      )}`,
     };
   },
 });
 
-export const upload = multer({ storage });
+export const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
