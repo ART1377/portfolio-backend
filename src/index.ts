@@ -48,11 +48,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser()); // Add cookie parser middleware
 
-const uploadsDir = path.join(__dirname, "./uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
+const uploadsDir = path.join(process.cwd(), "uploads");
 app.use("/api/uploads", express.static(uploadsDir));
 
 app.use("/api/hero", heroRoutes);
