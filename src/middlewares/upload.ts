@@ -3,18 +3,21 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
 import cloudinary from "../utils/cloudinary";
 
+
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
+    const isPdf = file.mimetype === "application/pdf";
     return {
       folder: "portfolio_uploads",
-      resource_type: "auto",
+      resource_type: isPdf ? "raw" : "auto",
       public_id: `${file.fieldname}-${Date.now()}-${Math.round(
         Math.random() * 1e9
       )}`,
     };
   },
 });
+
 
 export const upload = multer({
   storage,

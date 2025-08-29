@@ -11,7 +11,7 @@ router.get("/", getHero);
 router.put("/", jwtAuth, updateHero);
 
 // Resume upload (protected)
-router.post("/upload-resume", jwtAuth, upload.single("resume"), uploadResume);
+router.post("/upload-resume", upload.single("resume"), uploadResume);
 
 // Resume download (public)
 router.get("/resume", downloadResume);
