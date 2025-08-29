@@ -14,63 +14,51 @@ if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH || !JWT_SECRET) {
 export const loginController = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  // Validate input
   if (!username || !password) {
-    return res.status(400).json({
-      errorCode: "MISSING_CREDENTIALS",
-      message: "Username and password are required",
-    });
+    return res
+      .status(400)
+      .json({
+        errorCode: "MISSING_CREDENTIALS",
+        message: "Username and password are required",
+      });
   }
 
   if (username !== ADMIN_USERNAME) {
-    return res.status(401).json({
-      errorCode: "INVALID_CREDENTIALS",
-      message: "Invalid username or password",
-    });
+    return res
+      .status(401)
+      .json({
+        errorCode: "INVALID_CREDENTIALS",
+        message: "Invalid username or password",
+      });
   }
 
   try {
     const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
 
     if (!passwordMatch) {
-      return res.status(401).json({
-        errorCode: "INVALID_CREDENTIALS",
-        message: "Invalid username or password",
-      });
+      return res
+        .status(401)
+        .json({
+          errorCode: "INVALID_CREDENTIALS",
+          message: "Invalid username or password",
+        });
     }
 
     const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
 
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    //   secure: process.env.NODE_ENV === "production",
-    //   maxAge: 60 * 60 * 1000, // 1 hour
-    //   path: "/",
-    // });
-
-    // Also make sure your cookie settings work for cross-origin
-    // In your loginController
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 1000, // 1 hour
-      path: "/",
-    });
-
-    return res.json({
-      success: true,
-      message: "Login successful",
-    });
+    // return token in response body
+    return res.json({ success: true, token, message: "Login successful" });
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({
-      errorCode: "INTERNAL_ERROR",
-      message: "An internal server error occurred",
-    });
+    return res
+      .status(500)
+      .json({
+        errorCode: "INTERNAL_ERROR",
+        message: "An internal server error occurred",
+      });
   }
 };
+
 
 export const logoutController = (req: Request, res: Response) => {
   try {
