@@ -6,7 +6,7 @@ import { upload } from "../middlewares/upload"; // multer disk storage
 const router = express.Router();
 
 
-router.post("/upload", jwtAuth, upload.single("image"), uploadImage);
-router.post("/delete", jwtAuth, deleteImage);
+router.post("/upload", upload.single("image"), uploadImage);
+router.post("/delete", deleteImage);
 
 export default router;

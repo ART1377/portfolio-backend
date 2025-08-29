@@ -69,14 +69,16 @@ app.get("/api/cloudinary-test", async (req, res) => {
   try {
     const result = await cloudinary.uploader.upload(
       "https://res.cloudinary.com/demo/image/upload/sample.jpg",
-      { folder: "test" }
+      { folder: "test", resource_type: "image" }
     );
     res.json({ success: true, result });
-  } catch (error: any) {
-    console.error("Cloudinary test failed:", error);
-    res.status(500).json({ success: false, error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Cloudinary test failed:", message);
+    res.status(500).json({ success: false, error: message });
   }
 });
+
 
 // Public login endpoint (no JWT)
 app.use("/api/auth", adminRoutes);
