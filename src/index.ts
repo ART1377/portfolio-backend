@@ -18,6 +18,7 @@ import contactInfoRoutes from "./routes/contactInfo.route";
 import suggestionsRoutes from "./routes/suggestions.routes";
 import fs from "fs";
 import adminRoutes from "./routes/admin.route";
+import cloudinary from "./utils/cloudinary";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -63,11 +64,23 @@ app.use("/api/image", uploadImageRoutes);
 app.use("/api/contact-info", contactInfoRoutes);
 app.use("/api/suggestions", suggestionsRoutes);
 
+
+app.get("/api/cloudinary-test", async (req, res) => {
+  try {
+    const result = await cloudinary.uploader.upload(
+      "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+      { folder: "test" }
+    );
+    res.json({ success: true, result });
+  } catch (error: any) {
+    console.error("Cloudinary test failed:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Public login endpoint (no JWT)
 app.use("/api/auth", adminRoutes);
 
-// Everything else under /api/admin is protected
-// app.use("/api/admin", jwtAuth);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
