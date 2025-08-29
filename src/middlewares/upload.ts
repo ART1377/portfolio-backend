@@ -1,16 +1,15 @@
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
+import multer, { FileFilterCallback } from "multer";
 import cloudinary from "../utils/cloudinary";
+import { Request } from "express";
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
-    const lang = req.body.lang || "general";
-
+  params: async (req: Request, file: Express.Multer.File) => {
     return {
-      folder: "portfolio_uploads", // all resumes/images go here
-      resource_type: "auto", // supports pdf, images, videos
-      public_id: `${file.fieldname}-${lang}-${Date.now()}`,
+      folder: "portfolio_uploads", // Folder on Cloudinary
+      resource_type: "auto", // Images, PDFs, etc.
+      public_id: `${file.fieldname}-${Date.now()}`, // Unique name
     };
   },
 });

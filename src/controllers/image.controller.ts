@@ -1,7 +1,5 @@
 // controllers/image.controller.ts
 import { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
 import { prisma } from "../lib/helper/prisma";
 import cloudinary from "../utils/cloudinary";
 
@@ -9,15 +7,14 @@ export const uploadImage = async (req: Request, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      folder: "projects",
-    });
+    const file = req.file as Express.Multer.File & {
+      filename?: string;
+      public_id?: string;
+      secure_url?: string;
+    };
 
-    // Delete local file after upload
-    fs.unlinkSync(req.file.path);
-
-    const fileUrl = uploadResult.secure_url;
-    const publicId = uploadResult.public_id;
+    const fileUrl = file.secure_url!;
+    const publicId = file.filename || file.public_id;
 
     const projectId = req.query.projectId as string;
     if (projectId) {
@@ -33,6 +30,8 @@ export const uploadImage = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to upload image" });
   }
 };
+
+
 
 
 export const deleteImage = async (req: Request, res: Response) => {
