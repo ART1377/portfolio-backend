@@ -2,19 +2,24 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
 import cloudinary from "../utils/cloudinary";
+import fs from "fs";
+
 
 export const uploadImage = async (req: Request, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const file = req.file as Express.Multer.File & {
-      filename?: string;
-      public_id?: string;
-      secure_url?: string;
-    };
+    // Upload file to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "portfolio_uploads", // optional
+      resource_type: "image",
+    });
 
-    const fileUrl = file.secure_url!;
-    const publicId = file.filename || file.public_id;
+    // Remove local file after upload
+    fs.unlinkSync(req.file.path);
+
+    const fileUrl = result.secure_url; // this is the Cloudinary URL
+    const publicId = result.public_id;
 
     const projectId = req.query.projectId as string;
     if (projectId) {
@@ -30,7 +35,6 @@ export const uploadImage = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to upload image" });
   }
 };
-
 
 
 
