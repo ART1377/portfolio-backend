@@ -164,6 +164,7 @@ model ProjectItem {
   title        String
   description  String
   image        String?
+  imageId     String?
   liveUrl      String?
   githubUrl    String?
   projectId    Int
