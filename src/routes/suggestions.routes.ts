@@ -5,12 +5,13 @@ import {
   // updateSuggestion,
   deleteSuggestion,
 } from "../controllers/suggestions.controller";
+import { jwtAuth } from "../utils/jwtAuth";
 
 const router = express.Router();
 
 router.get("/", getSuggestions);
-router.post("/", addSuggestion);
-router.delete("/:id", deleteSuggestion);
+router.post("/", jwtAuth, addSuggestion);
+router.delete("/:id", jwtAuth, deleteSuggestion);
 // router.put("/:id", updateSuggestion);
 
 export default router;
