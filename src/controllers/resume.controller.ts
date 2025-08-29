@@ -21,22 +21,21 @@ export const uploadResume = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Hero data not found." });
     }
 
-    const uploadsDir = path.join(__dirname, "../uploads");
-    if (!fs.existsSync(uploadsDir))
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // Cloudinary already gives us a public URL
+    const cloudinaryUrl = (req.file as any).path;
 
-    const filename = `resume-${lang}.pdf`;
-    const filePath = path.join(uploadsDir, filename);
-
-    fs.renameSync(req.file.path, filePath);
+    const filename = (req.file as any).originalname || path.basename(cloudinaryUrl);
 
     await prisma.resume.upsert({
       where: { lang },
-      update: { filename, path: filePath, heroId: hero.id },
-      create: { lang, filename, path: filePath, heroId: hero.id },
+      update: { path: cloudinaryUrl, heroId: hero.id, filename },
+      create: { lang, path: cloudinaryUrl, heroId: hero.id, filename },
     });
 
-    res.json({ message: `Resume (${lang}) uploaded successfully.` });
+    res.json({
+      message: `Resume (${lang}) uploaded successfully.`,
+      url: cloudinaryUrl,
+    });
   } catch (err) {
     console.error("Error uploading resume:", err);
     res.status(500).json({ message: "Failed to upload resume." });
@@ -50,10 +49,9 @@ export const downloadResume = async (req: Request, res: Response) => {
       return res.status(400).send("Invalid language.");
 
     const resume = await prisma.resume.findUnique({ where: { lang } });
-    if (!resume || !fs.existsSync(resume.path))
-      return res.status(404).send("Resume not found.");
+    if (!resume) return res.status(404).send("Resume not found.");
 
-    res.download(resume.path);
+    res.redirect(resume.path); // redirect to Cloudinary file
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
