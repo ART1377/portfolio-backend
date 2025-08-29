@@ -7,73 +7,32 @@ import cloudinary from "../utils/cloudinary";
 
 export const uploadImage = async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    // Upload to Cloudinary
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      folder: "projects", // optional: put images in a folder
-      resource_type: "image",
+      folder: "projects",
     });
 
-    // Uploaded file URL
-    const fileUrl = uploadResult.secure_url;
+    // Delete local file after upload
+    fs.unlinkSync(req.file.path);
 
-    // If this is a project image upload (contains projectId in query), update the database
+    const fileUrl = uploadResult.secure_url;
+    const publicId = uploadResult.public_id;
+
     const projectId = req.query.projectId as string;
     if (projectId) {
       await prisma.projectItem.update({
         where: { id: parseInt(projectId) },
-        data: { image: fileUrl },
+        data: { image: fileUrl, imageId: publicId },
       });
     }
 
-    res.json({ imageUrl: fileUrl });
+    res.json({ imageUrl: fileUrl, publicId });
   } catch (error) {
     console.error("Error uploading image:", error);
     res.status(500).json({ error: "Failed to upload image" });
   }
 };
-
-// export const deleteImage = async (req: Request, res: Response) => {
-//   try {
-//     const { path: imagePath, projectId } = req.body;
-
-//     if (!imagePath) {
-//       return res.status(400).json({ error: "No path provided" });
-//     }
-
-//     // Resolve to absolute path on server
-//     const fullPath = path.join(__dirname, "../", imagePath);
-
-//     // Delete the file from filesystem
-//     fs.unlink(fullPath, async (err) => {
-//       if (err) {
-//         console.error("Failed to delete image:", err);
-//         return res.status(500).json({ error: "Failed to delete image" });
-//       }
-
-//       // If this is a project image, update the database
-//       if (projectId) {
-//         try {
-//           await prisma.projectItem.update({
-//             where: { id: parseInt(projectId) },
-//             data: { image: "" },
-//           });
-//         } catch (dbError) {
-//           console.error("Failed to update database:", dbError);
-//           // Don't fail the request if DB update fails, as file is already deleted
-//         }
-//       }
-
-//       res.json({ message: "Image deleted successfully" });
-//     });
-//   } catch (error) {
-//     console.error("Error deleting image:", error);
-//     res.status(500).json({ error: "Failed to delete image" });
-//   }
-// };
 
 
 export const deleteImage = async (req: Request, res: Response) => {
