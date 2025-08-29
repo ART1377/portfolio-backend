@@ -18,7 +18,6 @@ import contactInfoRoutes from "./routes/contactInfo.route";
 import suggestionsRoutes from "./routes/suggestions.routes";
 import fs from "fs";
 import adminRoutes from "./routes/admin.route";
-import { jwtAuth } from "./utils/jwtAuth";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -43,28 +42,8 @@ app.use(
       }
     },
     credentials: true, // This is crucial!
-    exposedHeaders: ["set-cookie"], // Optional: if you need to access set-cookie header
   })
 );
-
-// // In your Express app (after setting up CORS)
-// app.use((req, res, next) => {
-//   // Allow credentials
-//   res.header("Access-Control-Allow-Credentials", "true");
-
-//   // Allow specific headers test
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-//   );
-
-//   // Allow specific methods
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-
-//   next();
-// });
-
-
 
 app.use(express.json());
 app.use(cookieParser()); // Add cookie parser middleware
