@@ -1,0 +1,202 @@
+[
+  {
+    "id": "1",
+    "name": "React"
+  },
+  {
+    "id": "2",
+    "name": "Next.js"
+  },
+  {
+    "id": "3",
+    "name": "TypeScript"
+  },
+  {
+    "id": "4",
+    "name": "JavaScript"
+  },
+  {
+    "id": "5",
+    "name": "Node.js"
+  },
+  {
+    "id": "6",
+    "name": "Express.js"
+  },
+  {
+    "id": "7",
+    "name": "Vue.js"
+  },
+  {
+    "id": "8",
+    "name": "Angular"
+  },
+  {
+    "id": "9",
+    "name": "Svelte"
+  },
+  {
+    "id": "10",
+    "name": "Tailwind CSS"
+  },
+  {
+    "id": "11",
+    "name": "Bootstrap"
+  },
+  {
+    "id": "12",
+    "name": "HTML"
+  },
+  {
+    "id": "13",
+    "name": "CSS"
+  },
+  {
+    "id": "14",
+    "name": "GraphQL"
+  },
+  {
+    "id": "15",
+    "name": "Apollo"
+  },
+  {
+    "id": "16",
+    "name": "Redux"
+  },
+  {
+    "id": "17",
+    "name": "MobX"
+  },
+  {
+    "id": "19",
+    "name": "Vitest"
+  },
+  {
+    "id": "20",
+    "name": "Cypress"
+  },
+  {
+    "id": "21",
+    "name": "Docker"
+  },
+  {
+    "id": "22",
+    "name": "Kubernetes"
+  },
+  {
+    "id": "23",
+    "name": "Python"
+  },
+  {
+    "id": "24",
+    "name": "Django"
+  },
+  {
+    "id": "25",
+    "name": "Flask"
+  },
+  {
+    "id": "26",
+    "name": "Ruby on Rails"
+  },
+  {
+    "id": "27",
+    "name": "PHP"
+  },
+  {
+    "id": "28",
+    "name": "Laravel"
+  },
+  {
+    "id": "29",
+    "name": "MySQL"
+  },
+  {
+    "id": "30",
+    "name": "PostgreSQL"
+  },
+  {
+    "id": "31",
+    "name": "MongoDB"
+  },
+  {
+    "id": "32",
+    "name": "Firebase"
+  },
+  {
+    "id": "33",
+    "name": "AWS"
+  },
+  {
+    "id": "34",
+    "name": "Azure"
+  },
+  {
+    "id": "35",
+    "name": "GCP"
+  },
+  {
+    "id": "36",
+    "name": "Tailwind UI"
+  },
+  {
+    "id": "37",
+    "name": "Chakra UI"
+  },
+  {
+    "id": "38",
+    "name": "Material UI"
+  },
+  {
+    "id": "39",
+    "name": "Sass"
+  },
+  {
+    "id": "40",
+    "name": "Less"
+  },
+  {
+    "id": "41",
+    "name": "Webpack"
+  },
+  {
+    "id": "42",
+    "name": "Vite"
+  },
+  {
+    "id": "43",
+    "name": "Babel"
+  },
+  {
+    "id": "44",
+    "name": "ESLint"
+  },
+  {
+    "id": "45",
+    "name": "Prettier"
+  },
+  {
+    "id": "46",
+    "name": "JQuery"
+  },
+  {
+    "id": "47",
+    "name": "GraphQL Apollo"
+  },
+  {
+    "id": "48",
+    "name": "React Query"
+  },
+  {
+    "id": "49",
+    "name": "Zustand"
+  },
+  {
+    "id": "50",
+    "name": "RxJS"
+  },
+  {
+    "id": "1754473289443",
+    "name": "Jest"
+  }
+]
