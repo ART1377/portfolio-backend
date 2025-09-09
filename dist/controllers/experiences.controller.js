@@ -1,0 +1,147 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateExperiences = exports.getExperiences = void 0;
+const prisma_1 = require("../lib/helper/prisma");
+const getExperiences = async (req, res) => {
+    try {
+        const lang = req.query.lang || "en";
+        if (!["en", "fa"].includes(lang)) {
+            return res.status(400).json({ message: "Invalid language" });
+        }
+        const experienceData = await prisma_1.prisma.experience.findUnique({
+            where: { lang },
+            include: {
+                experiences: {
+                    include: {
+                        technologies: true,
+                    },
+                },
+                education: true,
+                courses: true,
+            },
+        });
+        if (!experienceData) {
+            return res.status(404).json({ message: "Experience data not found" });
+        }
+        // Transform the data to match your frontend expectations
+        const localized = {
+            experiences: experienceData.experiences.map((exp) => ({
+                title: exp.title,
+                company: exp.company,
+                period: exp.period,
+                description: exp.description,
+                technologies: exp.technologies.map((tech) => tech.name),
+            })),
+            education: experienceData.education.map((edu) => ({
+                degree: edu.degree,
+                school: edu.school,
+                period: edu.period,
+                description: edu.description,
+            })),
+            courses: experienceData.courses.map((course) => ({
+                name: course.name,
+                org: course.org,
+                year: course.year,
+            })),
+        };
+        res.json(localized);
+    }
+    catch (error) {
+        console.error("Error fetching experience data:", error);
+        res.status(500).json({ error: "Failed to read experience data" });
+    }
+};
+exports.getExperiences = getExperiences;
+const updateExperiences = async (req, res) => {
+    try {
+        const lang = req.query.lang || "en";
+        const newData = req.body;
+        if (!["en", "fa"].includes(lang)) {
+            return res.status(400).json({ message: "Invalid language" });
+        }
+        // Use a transaction to ensure all operations succeed or fail together
+        await prisma_1.prisma.$transaction(async (tx) => {
+            // Upsert the main experience record
+            const experience = await tx.experience.upsert({
+                where: { lang },
+                update: {},
+                create: { lang },
+            });
+            // Update experiences
+            if (newData.experiences) {
+                // Delete existing experiences and their technologies
+                const existingExperiences = await tx.experienceItem.findMany({
+                    where: { experienceId: experience.id },
+                });
+                for (const exp of existingExperiences) {
+                    await tx.experienceTechnology.deleteMany({
+                        where: { experienceItemId: exp.id },
+                    });
+                }
+                await tx.experienceItem.deleteMany({
+                    where: { experienceId: experience.id },
+                });
+                // Create new experiences
+                for (const exp of newData.experiences) {
+                    const newExp = await tx.experienceItem.create({
+                        data: {
+                            title: exp.title,
+                            company: exp.company,
+                            period: exp.period,
+                            description: exp.description,
+                            experienceId: experience.id,
+                        },
+                    });
+                    // Create technologies
+                    if (exp.technologies && exp.technologies.length > 0) {
+                        await tx.experienceTechnology.createMany({
+                            data: exp.technologies.map((tech) => ({
+                                name: tech,
+                                experienceItemId: newExp.id,
+                            })),
+                        });
+                    }
+                }
+            }
+            // Update education
+            if (newData.education) {
+                // Delete existing education
+                await tx.educationItem.deleteMany({
+                    where: { experienceId: experience.id },
+                });
+                // Create new education
+                await tx.educationItem.createMany({
+                    data: newData.education.map((edu) => ({
+                        degree: edu.degree,
+                        school: edu.school,
+                        period: edu.period,
+                        description: edu.description,
+                        experienceId: experience.id,
+                    })),
+                });
+            }
+            // Update courses
+            if (newData.courses) {
+                // Delete existing courses
+                await tx.courseItem.deleteMany({
+                    where: { experienceId: experience.id },
+                });
+                // Create new courses
+                await tx.courseItem.createMany({
+                    data: newData.courses.map((course) => ({
+                        name: course.name,
+                        org: course.org,
+                        year: course.year,
+                        experienceId: experience.id,
+                    })),
+                });
+            }
+        });
+        res.status(200).json({ message: "Experiences updated successfully" });
+    }
+    catch (error) {
+        console.error("Error updating experiences:", error);
+        res.status(500).json({ message: "Failed to update", error });
+    }
+};
+exports.updateExperiences = updateExperiences;

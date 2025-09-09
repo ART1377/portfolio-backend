@@ -1,0 +1,24 @@
+{
+    "en": {
+        "email": "alex.johnson@email.com",
+        "phone": "+1 (555) 123-4511",
+        "location": "San Francisco, CA",
+        "social": {
+            "github": "https://github.com/yourusername",
+            "linkedin": "https://linkedin.com/in/yourprofile",
+            "telegram": "https://telegram.com/yourhandle"
+        },
+        "updatedAt": "2025-08-05T09:30:00.000Z"
+    },
+    "fa": {
+        "email": "alex.johnson@email.com",
+        "phone": "۰۹۱۲۱۲۳۴۵۶۷",
+        "location": "تهران، ایران",
+        "social": {
+            "github": "https://github.com/yourusername",
+            "linkedin": "https://linkedin.com/in/yourprofile",
+            "telegram": "https://telegram.com/yourhandle"
+        },
+        "updatedAt": "2025-08-12T08:02:19.364Z"
+    }
+}

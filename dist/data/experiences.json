@@ -1,0 +1,128 @@
+{
+    "en": {
+        "experiences": [
+            {
+                "title": "Senior Frontend Developer",
+                "company": "TechCorp Solutions",
+                "period": "2022 - Present",
+                "description": "Lead frontend development for enterprise applications, mentoring junior developers, and implementing modern React patterns and best practices.",
+                "technologies": [
+                    "React",
+                    "Next.js",
+                    "TypeScript",
+                    "GraphQL",
+                    "AWS"
+                ]
+            },
+            {
+                "title": "Mid-Level Frontend Developer",
+                "company": "Digital Agency Pro",
+                "period": "2020 - 2022",
+                "description": "Developed responsive web applications for various clients, collaborated with design teams, and optimized application performance.",
+                "technologies": [
+                    "React",
+                    "Vue.js",
+                    "SASS",
+                    "Webpack",
+                    "Jest"
+                ]
+            },
+            {
+                "title": "Junior Frontend Developer",
+                "company": "StartupXYZ",
+                "period": "2019 - 2020",
+                "description": "Built user interfaces for a SaaS platform, participated in code reviews, and contributed to the company's design system.",
+                "technologies": [
+                    "JavaScript",
+                    "React",
+                    "CSS3",
+                    "HTML5",
+                    "Git"
+                ]
+            }
+        ],
+        "education": [
+            {
+                "degree": "Bachelor of Science in Computer Science",
+                "school": "University of Technology",
+                "period": "2015 - 2019",
+                "description": "Focused on software engineering, data structures, and web development. Graduated with honors."
+            }
+        ],
+        "courses": [
+            {
+                "name": "React Developer Course",
+                "org": "Meta",
+                "year": "2023"
+            },
+            {
+                "name": "AWS Cloud Practitioner",
+                "org": "Amazon Web Services",
+                "year": "2022"
+            }
+        ]
+    },
+    "fa": {
+        "experiences": [
+            {
+                "title": "توسعه‌دهنده ارشد فرانت‌اند",
+                "company": "تک‌کورپ سولوشنز",
+                "period": "۲۰۲۲ - اکنون",
+                "description": "رهبری توسعه رابط کاربری برنامه‌های سازمانی، راهنمایی توسعه‌دهندگان جوان، و پیاده‌سازی الگوهای مدرن React و بهترین روش‌ها.",
+                "technologies": [
+                    "React",
+                    "Next.js",
+                    "TypeScript",
+                    "GraphQL",
+                    "React Query"
+                ]
+            },
+            {
+                "title": "توسعه‌دهنده فرانت‌اند سطح متوسط",
+                "company": "آژانس دیجیتال پرو",
+                "period": "۲۰۲۰ - ۲۰۲۲",
+                "description": "توسعه برنامه‌های وب واکنش‌گرا برای مشتریان مختلف، همکاری با تیم‌های طراحی و بهینه‌سازی عملکرد برنامه.",
+                "technologies": [
+                    "React",
+                    "Vue.js",
+                    "SASS",
+                    "Webpack",
+                    "Jest"
+                ]
+            },
+            {
+                "title": "توسعه‌دهنده فرانت‌اند جونیور",
+                "company": "استارتاپ XYZ",
+                "period": "۲۰۱۹ - ۲۰۲۰",
+                "description": "ساخت رابط‌های کاربری برای پلتفرم SaaS، شرکت در بررسی کدها، و مشارکت در توسعه سیستم طراحی شرکت.",
+                "technologies": [
+                    "JavaScript",
+                    "React",
+                    "CSS3",
+                    "HTML5",
+                    "Git"
+                ]
+            }
+        ],
+        "education": [
+            {
+                "degree": "کارشناسی علوم کامپیوتر",
+                "school": "دانشگاه فناوری",
+                "period": "۲۰۱۵ - ۲۰۱۹",
+                "description": "تمرکز بر مهندسی نرم‌افزار، ساختمان داده و توسعه وب. فارغ‌التحصیل با رتبه عالی."
+            }
+        ],
+        "courses": [
+            {
+                "name": "مدرک توسعه‌دهنده React",
+                "org": "متا",
+                "year": "۲۰۲۳"
+            },
+            {
+                "name": "کارشناس فضای ابری AWS",
+                "org": "آمازون وب سرویس",
+                "year": "۲۰۲۲"
+            }
+        ]
+    }
+}
