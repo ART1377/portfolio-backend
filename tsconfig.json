@@ -11,6 +11,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "lib": ["ES2020"],
+    "types": ["node", "express"],
     "typeRoots": ["./node_modules/@types"]
   },
   "include": ["src/**/*", "src/data/**/*.json"],
