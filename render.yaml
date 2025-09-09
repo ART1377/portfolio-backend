@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: my-express-api
+    env: node
+    plan: free
+    buildCommand: "npm run build"
+    startCommand: "npm run prisma:migrate && npm start"
+    envVars:
+      - key: DATABASE_URL
+        sync: false   # safer to set in dashboard or via Environment Group
