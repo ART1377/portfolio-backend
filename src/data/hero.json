@@ -2,11 +2,7 @@
   "en": {
     "name": "Alex Johnson",
     "initials": "AJ",
-    "roles": [
-      "Frontend Developer",
-      "React Enthusiast",
-      "GSAP Animator"
-    ],
+    "roles": ["Frontend Developer", "React Enthusiast", "GSAP Animator"],
     "bio": "I create beautiful, responsive web applications with modern technologies... ",
     "socials": {
       "github": "https://github.com/your-username",
@@ -15,13 +11,9 @@
     }
   },
   "fa": {
-    "name": "الکس جانسون",
+    "name": "علیرضا تهوری",
     "initials": "ا.ج",
-    "roles": [
-      "توسعه‌دهنده فرانت‌اند",
-      "علاقه‌مند به ری‌اکت",
-      "انیماتور GSAP"
-    ],
+    "roles": ["توسعه‌دهنده فرانت‌اند", "علاقه‌مند به ری‌اکت", "انیماتور GSAP"],
     "bio": "من با استفاده از تکنولوژی‌های مدرن اپلیکیشن‌های زیبای واکنش‌گرا می‌سازم... ",
     "socials": {
       "github": "https://github.com/your-username",
