@@ -13,7 +13,8 @@
     "prisma:studio": "prisma studio",
     "prisma:reset": "prisma migrate reset",
     "postinstall": "prisma generate",
-    "migrate:neon": "DATABASE_URL=$npm_config_db_url npx prisma migrate deploy"
+    "migrate:neon": "DATABASE_URL=$npm_config_db_url npx prisma migrate deploy",
+    "render-build": "chmod +x render-build.sh && ./render-build.sh"
   },
   "dependencies": {
     "@types/node": "^20.19.5",

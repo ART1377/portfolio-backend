@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: my-express-api
-    env: node
-    plan: free
-    buildCommand: "npm install && npm run build"
-    startCommand: "npm run prisma:migrate && npm start"
