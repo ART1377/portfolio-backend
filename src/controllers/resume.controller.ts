@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
+import cloudinary from "../utils/cloudinary";
 
 export const uploadResume = async (req: Request, res: Response) => {
   try {
@@ -43,15 +44,23 @@ export const uploadResume = async (req: Request, res: Response) => {
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const lang = req.query.lang as string;
-    if (!["en", "fa"].includes(lang))
-      return res.status(400).send("Invalid language.");
 
-    const resume = await prisma.resume.findUnique({ where: { lang } });
-    if (!resume) return res.status(404).send("Resume not found.");
+    const publicId =
+      lang === "en"
+        ? "portfolio_uploads/Alireza Tahavori-en.pdf"
+        : "portfolio_uploads/Alireza Tahavori-fa.pdf";
 
-    res.redirect(resume.path); // ✅ use `path` field
+    // Generate URL with fl_attachment to force correct headers
+    const url = cloudinary.url(publicId, {
+      resource_type: "raw",
+      flags: "attachment",
+      secure: true,
+    });
+
+    return res.redirect(url);
   } catch (err) {
-    console.error("Error downloading resume:", err);
-    res.status(500).send("Failed to download resume.");
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch resume" });
   }
 };
+
