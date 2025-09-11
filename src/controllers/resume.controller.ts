@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
+import cloudinary from "../utils/cloudinary";
 
 export const uploadResume = async (req: Request, res: Response) => {
   try {
@@ -39,7 +40,6 @@ export const uploadResume = async (req: Request, res: Response) => {
   }
 };
 
-
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const lang = req.query.lang as string;
@@ -49,7 +49,14 @@ export const downloadResume = async (req: Request, res: Response) => {
     const resume = await prisma.resume.findUnique({ where: { lang } });
     if (!resume) return res.status(404).send("Resume not found.");
 
-    res.redirect(resume.path); // ✅ use `path` field
+    // ✅ Generate proper download link
+    const downloadUrl = cloudinary.url(resume.filename.replace(".pdf", ""), {
+      resource_type: "raw",
+      type: "upload",
+      attachment: true, // force download
+    });
+
+    res.redirect(downloadUrl);
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
