@@ -40,25 +40,30 @@ export const uploadResume = async (req: Request, res: Response) => {
   }
 };
 
+
 export const downloadResume = async (req: Request, res: Response) => {
   try {
-    const lang = req.query.lang as string;
-    if (!["en", "fa"].includes(lang))
-      return res.status(400).send("Invalid language.");
+    const { lang } = req.query;
 
-    const resume = await prisma.resume.findUnique({ where: { lang } });
-    if (!resume) return res.status(404).send("Resume not found.");
+    // Construct the public_id based on your naming convention
+    const publicId = `portfolio_uploads/Alireza-Tahavori-${lang}`;
 
-    // ✅ Generate proper download link
-    const downloadUrl = cloudinary.url(resume.filename.replace(".pdf", ""), {
+    // Get the secure URL from Cloudinary
+    const result = await cloudinary.api.resource(publicId, {
       resource_type: "raw",
-      type: "upload",
-      attachment: true, // force download
     });
 
-    res.redirect(downloadUrl);
-  } catch (err) {
-    console.error("Error downloading resume:", err);
-    res.status(500).send("Failed to download resume.");
+    // Set proper headers for PDF download
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Alireza-Tahavori-Resume-${lang}.pdf"`
+    );
+
+    // Redirect to Cloudinary's secure URL
+    res.redirect(result.secure_url);
+  } catch (error) {
+    console.error("Download error:", error);
+    res.status(500).json({ message: "Failed to download resume" });
   }
 };
