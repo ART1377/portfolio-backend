@@ -40,7 +40,6 @@ export const uploadResume = async (req: Request, res: Response) => {
 };
 
 
-
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const { lang } = req.query;
@@ -58,26 +57,13 @@ export const downloadResume = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Resume not found." });
     }
 
-    // Fetch the file from Cloudinary URL
-    const response = await fetch(resume.path);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    }
-
-    const blob = await response.blob();
-    const buffer = await blob.arrayBuffer();
-
-    // Set proper headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="Alireza-Tahavori-Resume-${lang}.pdf"`
+    // Redirect to Cloudinary URL with download parameters
+    const downloadUrl = resume.path.replace(
+      '/upload/',
+      '/upload/fl_attachment:Alireza-Tahavori-Resume-' + lang + '.pdf/'
     );
-    res.setHeader("Content-Length", buffer.byteLength);
 
-    // Send the file
-    res.send(Buffer.from(buffer));
+    res.redirect(downloadUrl);
 
   } catch (error) {
     console.error("Download error:", error);
