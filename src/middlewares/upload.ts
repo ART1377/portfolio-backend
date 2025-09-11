@@ -7,11 +7,13 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const isPdf = file.mimetype === "application/pdf";
+    const lang = req.body.lang; // Get language from request
+
     return {
       folder: "portfolio_uploads",
       resource_type: isPdf ? "raw" : "auto",
       public_id: isPdf
-        ? `Alireza-Tahavori-${Date.now()}.pdf` // Add .pdf extension
+        ? `Alireza-Tahavori-Resume-${lang}` // Consistent naming with language
         : `${file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
     };
   },

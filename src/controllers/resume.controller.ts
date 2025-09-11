@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
-import cloudinary from "../utils/cloudinary";
 
 export const uploadResume = async (req: Request, res: Response) => {
   try {
@@ -41,32 +40,45 @@ export const uploadResume = async (req: Request, res: Response) => {
 };
 
 
+
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const { lang } = req.query;
-    const publicId = `portfolio_uploads/Alireza-Tahavori-${lang}`;
 
-    // Get the download URL
-    const url = cloudinary.url(publicId, {
-      resource_type: "raw",
-      flags: "attachment:Alireza-Tahavori-Resume-" + lang + ".pdf",
+    if (!lang || typeof lang !== "string" || !["en", "fa"].includes(lang)) {
+      return res.status(400).json({ message: "Invalid language code." });
+    }
+
+    // Get the resume URL from database
+    const resume = await prisma.resume.findUnique({
+      where: { lang },
     });
 
-    // Fetch the file from Cloudinary
-    const response = await fetch(url);
-    const blob = await response.blob();
+    if (!resume || !resume.path) {
+      return res.status(404).json({ message: "Resume not found." });
+    }
 
-    // Set headers
+    // Fetch the file from Cloudinary URL
+    const response = await fetch(resume.path);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    const buffer = await blob.arrayBuffer();
+
+    // Set proper headers
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="Alireza-Tahavori-Resume-${lang}.pdf"`
     );
-    res.setHeader("Content-Length", blob.size);
+    res.setHeader("Content-Length", buffer.byteLength);
 
-    // Convert blob to buffer and send
-    const buffer = await blob.arrayBuffer();
+    // Send the file
     res.send(Buffer.from(buffer));
+
   } catch (error) {
     console.error("Download error:", error);
     res.status(500).json({ message: "Failed to download resume" });
