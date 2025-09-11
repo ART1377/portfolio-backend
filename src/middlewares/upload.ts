@@ -11,7 +11,7 @@ const storage = new CloudinaryStorage({
       folder: "portfolio_uploads",
       resource_type: isPdf ? "raw" : "auto",
       public_id: isPdf
-        ? `Alireza Tahavori-${Date.now()}` // fixed name for PDFs
+        ? `Alireza Tahavori-${Date.now()}.pdf` // fixed name for PDFs
         : `${file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
     };
   },
