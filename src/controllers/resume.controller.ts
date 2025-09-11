@@ -44,24 +44,29 @@ export const uploadResume = async (req: Request, res: Response) => {
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const { lang } = req.query;
-
-    // Construct the public_id based on your naming convention
     const publicId = `portfolio_uploads/Alireza-Tahavori-${lang}`;
 
-    // Get the secure URL from Cloudinary
-    const result = await cloudinary.api.resource(publicId, {
+    // Get the download URL
+    const url = cloudinary.url(publicId, {
       resource_type: "raw",
+      flags: "attachment:Alireza-Tahavori-Resume-" + lang + ".pdf",
     });
 
-    // Set proper headers for PDF download
+    // Fetch the file from Cloudinary
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    // Set headers
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="Alireza-Tahavori-Resume-${lang}.pdf"`
     );
+    res.setHeader("Content-Length", blob.size);
 
-    // Redirect to Cloudinary's secure URL
-    res.redirect(result.secure_url);
+    // Convert blob to buffer and send
+    const buffer = await blob.arrayBuffer();
+    res.send(Buffer.from(buffer));
   } catch (error) {
     console.error("Download error:", error);
     res.status(500).json({ message: "Failed to download resume" });
