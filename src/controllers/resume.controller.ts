@@ -67,6 +67,7 @@ export const uploadResume = async (req: Request, res: Response) => {
 };
 
 
+
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const { lang } = req.query;
@@ -84,22 +85,32 @@ export const downloadResume = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Resume not found." });
     }
 
-    // Generate a signed URL for download from Cloudinary
-    const signedUrl = cloudinary.url(resume.filename, {
-      resource_type: 'raw',
-      secure: true,
-      flags: 'attachment',
-      attachment: `Alireza-Tahavori-Resume-${lang}.pdf`,
-      sign_url: true // This creates a signed URL
+    // Use Cloudinary's API to get the secure URL
+    const resource = await cloudinary.api.resource(resume.filename, {
+      resource_type: 'raw'
     });
 
-    console.log('Generated download URL:', signedUrl); // Debug log
+    // Create a download URL with attachment flag
+    const downloadUrl = resource.secure_url.replace(
+      '/upload/',
+      '/upload/fl_attachment:Alireza-Tahavori-Resume-' + lang + '.pdf/'
+    );
 
-    // Redirect to the signed Cloudinary URL
-    res.redirect(signedUrl);
+    console.log('Redirecting to:', downloadUrl); // Debug
+
+    res.redirect(downloadUrl);
 
   } catch (error) {
     console.error("Download error:", error);
-    res.status(500).json({ message: "Failed to download resume" });
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error("Error details:", error.message, error.stack);
+    }
+    
+    res.status(500).json({ 
+      message: "Failed to download resume",
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 };
