@@ -66,6 +66,7 @@ export const uploadResume = async (req: Request, res: Response) => {
   }
 };
 
+
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const { lang } = req.query;
@@ -74,35 +75,29 @@ export const downloadResume = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid language code." });
     }
 
-    // Get the resume URL from database
+    // Get the resume from database
     const resume = await prisma.resume.findUnique({
       where: { lang },
     });
 
-    if (!resume || !resume.path) {
+    if (!resume || !resume.filename) {
       return res.status(404).json({ message: "Resume not found." });
     }
 
-    // Fetch the file from Cloudinary URL
-    const response = await fetch(resume.path);
+    // Generate a signed URL for download from Cloudinary
+    const signedUrl = cloudinary.url(resume.filename, {
+      resource_type: 'raw',
+      secure: true,
+      flags: 'attachment',
+      attachment: `Alireza-Tahavori-Resume-${lang}.pdf`,
+      sign_url: true // This creates a signed URL
+    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    }
+    console.log('Generated download URL:', signedUrl); // Debug log
 
-    const blob = await response.blob();
-    const buffer = await blob.arrayBuffer();
+    // Redirect to the signed Cloudinary URL
+    res.redirect(signedUrl);
 
-    // Set proper headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="Alireza-Tahavori-Resume-${lang}.pdf"`
-    );
-    res.setHeader("Content-Length", buffer.byteLength);
-
-    // Send the file
-    res.send(Buffer.from(buffer));
   } catch (error) {
     console.error("Download error:", error);
     res.status(500).json({ message: "Failed to download resume" });
