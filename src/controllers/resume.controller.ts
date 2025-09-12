@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
+import cloudinary from "../utils/cloudinary";
 
-// Updated uploadResume controller
 export const uploadResume = async (req: Request, res: Response) => {
   try {
     const lang = req.body.lang;
@@ -14,11 +14,6 @@ export const uploadResume = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "No file uploaded." });
     }
 
-    // Check if the uploaded file is a PDF
-    if (req.file.mimetype !== "application/pdf") {
-      return res.status(400).json({ message: "Only PDF files are allowed." });
-    }
-
     const hero = await prisma.hero.findUnique({ where: { lang } });
     if (!hero) {
       return res.status(404).json({ message: "Hero data not found." });
@@ -27,7 +22,7 @@ export const uploadResume = async (req: Request, res: Response) => {
     // Cloudinary gives us both public_id and path (url)
     const cloudinaryFile = req.file as any;
     const fileUrl = cloudinaryFile.path; // public URL
-    const fileName = cloudinaryFile.originalname; // Use original filename
+    const fileName = cloudinaryFile.filename || cloudinaryFile.originalname;
 
     await prisma.resume.upsert({
       where: { lang },
@@ -46,7 +41,6 @@ export const uploadResume = async (req: Request, res: Response) => {
 };
 
 
-// Alternative downloadResume controller using https module
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const lang = req.query.lang as string;
@@ -56,35 +50,7 @@ export const downloadResume = async (req: Request, res: Response) => {
     const resume = await prisma.resume.findUnique({ where: { lang } });
     if (!resume) return res.status(404).send("Resume not found.");
 
-    // Set proper headers for PDF download
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${resume.filename || `resume-${lang}.pdf`}"`
-    );
-
-    // Use native https module to fetch the file
-    const https = require('https');
-    const url = require('url');
-    
-    const parsedUrl = url.parse(resume.path);
-    const options = {
-      hostname: parsedUrl.hostname,
-      path: parsedUrl.path,
-      method: 'GET'
-    };
-
-    const request = https.request(options, (response: any) => {
-      // Pipe the response directly to the Express response
-      response.pipe(res);
-    });
-
-    request.on('error', (err: any) => {
-      console.error("Error downloading file from Cloudinary:", err);
-      res.status(500).send("Failed to download file.");
-    });
-
-    request.end();
+    res.redirect(resume.path); // ✅ use `path` field
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
