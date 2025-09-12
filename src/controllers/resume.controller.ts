@@ -44,7 +44,8 @@ export const uploadResume = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to upload resume." });
   }
 };
-// Updated downloadResume controller
+
+// Updated downloadResume controller - using axios instead of fetch
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const lang = req.query.lang as string;
@@ -58,15 +59,19 @@ export const downloadResume = async (req: Request, res: Response) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${resume.filename}"`
+      `attachment; filename="${resume.filename || `resume-${lang}.pdf`}"`
     );
 
-    // Fetch the file from Cloudinary and pipe it to the response
-    const response = await fetch(resume.path);
-    const blob = await response.blob();
-    const buffer = await blob.arrayBuffer();
-    
-    res.send(Buffer.from(buffer));
+    // Use axios to get the file from Cloudinary
+    const axios = require('axios');
+    const response = await axios({
+      method: 'GET',
+      url: resume.path,
+      responseType: 'stream'
+    });
+
+    // Pipe the response stream to the Express response
+    response.data.pipe(res);
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
