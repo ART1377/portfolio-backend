@@ -67,12 +67,14 @@ export const uploadResume = async (req: Request, res: Response) => {
 };
 
 
-
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const { lang } = req.query;
 
+    console.log('Download request for lang:', lang);
+
     if (!lang || typeof lang !== "string" || !["en", "fa"].includes(lang)) {
+      console.log('Invalid lang parameter:', lang);
       return res.status(400).json({ message: "Invalid language code." });
     }
 
@@ -81,29 +83,28 @@ export const downloadResume = async (req: Request, res: Response) => {
       where: { lang },
     });
 
-    if (!resume || !resume.filename) {
+    console.log('Database result:', resume);
+
+    if (!resume || !resume.path) {
+      console.log('Resume not found in database for lang:', lang);
       return res.status(404).json({ message: "Resume not found." });
     }
 
-    // Use Cloudinary's API to get the secure URL
-    const resource = await cloudinary.api.resource(resume.filename, {
-      resource_type: 'raw'
+    console.log('Found resume URL:', resume.path);
+
+    // Just return the URL for testing
+    res.json({
+      message: "Resume found",
+      downloadUrl: resume.path,
+      suggestedUrl: resume.path.replace(
+        /\/upload\//,
+        `/upload/fl_attachment:Alireza-Tahavori-Resume-${lang}.pdf/`
+      )
     });
-
-    // Create a download URL with attachment flag
-    const downloadUrl = resource.secure_url.replace(
-      '/upload/',
-      '/upload/fl_attachment:Alireza-Tahavori-Resume-' + lang + '.pdf/'
-    );
-
-    console.log('Redirecting to:', downloadUrl); // Debug
-
-    res.redirect(downloadUrl);
 
   } catch (error) {
     console.error("Download error:", error);
     
-    // More detailed error logging
     if (error instanceof Error) {
       console.error("Error details:", error.message, error.stack);
     }
