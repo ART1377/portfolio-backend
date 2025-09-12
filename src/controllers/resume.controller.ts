@@ -57,7 +57,17 @@ export const downloadResume = async (req: Request, res: Response) => {
     const resume = await prisma.resume.findUnique({ where: { lang } });
     if (!resume) return res.status(404).send("Resume not found.");
 
-    res.redirect(resume.path); // ✅ use `path` field
+    // Force download with .pdf extension
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${
+        resume.filename?.endsWith(".pdf")
+          ? resume.filename
+          : resume.filename + ".pdf"
+      }"`
+    );
+
+    res.redirect(resume.path); // redirect to Cloudinary URL
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
