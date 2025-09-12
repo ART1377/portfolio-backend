@@ -21,15 +21,8 @@ export const uploadResume = async (req: Request, res: Response) => {
 
     // Cloudinary gives us both public_id and path (url)
     const cloudinaryFile = req.file as any;
+    const fileUrl = cloudinaryFile.path; // public URL
     const fileName = cloudinaryFile.filename || cloudinaryFile.originalname;
-
-    let fileUrl = "";
-    if (cloudinaryFile.resource_type === "raw") {
-      fileUrl = cloudinaryFile.secure_url; // raw files
-    } else {
-      fileUrl = cloudinaryFile.path || cloudinaryFile.secure_url; // images/videos
-    }
-
 
     await prisma.resume.upsert({
       where: { lang },
@@ -57,17 +50,7 @@ export const downloadResume = async (req: Request, res: Response) => {
     const resume = await prisma.resume.findUnique({ where: { lang } });
     if (!resume) return res.status(404).send("Resume not found.");
 
-    // Force download with .pdf extension
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${
-        resume.filename?.endsWith(".pdf")
-          ? resume.filename
-          : resume.filename + ".pdf"
-      }"`
-    );
-
-    res.redirect(resume.path); // redirect to Cloudinary URL
+    res.redirect(resume.path); // ✅ use `path` field
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
