@@ -1,4 +1,3 @@
-// controllers/resume.controller.ts
 import { Request, Response } from "express";
 import { prisma } from "../lib/helper/prisma";
 import cloudinary from "../utils/cloudinary";
@@ -23,42 +22,17 @@ export const uploadResume = async (req: Request, res: Response) => {
     // Cloudinary gives us both public_id and path (url)
     const cloudinaryFile = req.file as any;
     const fileUrl = cloudinaryFile.path; // public URL
-    const publicId = cloudinaryFile.filename; // This should be the public_id
-
-    console.log("Upload details:", { lang, fileUrl, publicId }); // Debug log
-
-    // Delete old resume file from Cloudinary if it exists
-    try {
-      const oldResume = await prisma.resume.findUnique({ where: { lang } });
-      if (oldResume && oldResume.filename) {
-        await cloudinary.uploader.destroy(oldResume.filename, {
-          resource_type: "raw",
-        });
-      }
-    } catch (deleteError) {
-      console.warn("Could not delete old resume file:", deleteError);
-      // Continue with upload even if deletion fails
-    }
+    const fileName = cloudinaryFile.filename || cloudinaryFile.originalname;
 
     await prisma.resume.upsert({
       where: { lang },
-      update: {
-        filename: publicId,
-        path: fileUrl,
-        heroId: hero.id,
-      },
-      create: {
-        lang,
-        filename: publicId,
-        path: fileUrl,
-        heroId: hero.id,
-      },
+      update: { filename: fileName, path: fileUrl, heroId: hero.id },
+      create: { lang, filename: fileName, path: fileUrl, heroId: hero.id },
     });
 
     res.json({
       message: `Resume (${lang}) uploaded successfully.`,
       url: fileUrl,
-      publicId: publicId,
     });
   } catch (err) {
     console.error("Error uploading resume:", err);
@@ -69,49 +43,16 @@ export const uploadResume = async (req: Request, res: Response) => {
 
 export const downloadResume = async (req: Request, res: Response) => {
   try {
-    const { lang } = req.query;
+    const lang = req.query.lang as string;
+    if (!["en", "fa"].includes(lang))
+      return res.status(400).send("Invalid language.");
 
-    console.log('Download request for lang:', lang);
+    const resume = await prisma.resume.findUnique({ where: { lang } });
+    if (!resume) return res.status(404).send("Resume not found.");
 
-    if (!lang || typeof lang !== "string" || !["en", "fa"].includes(lang)) {
-      console.log('Invalid lang parameter:', lang);
-      return res.status(400).json({ message: "Invalid language code." });
-    }
-
-    // Get the resume from database
-    const resume = await prisma.resume.findUnique({
-      where: { lang },
-    });
-
-    console.log('Database result:', resume);
-
-    if (!resume || !resume.path) {
-      console.log('Resume not found in database for lang:', lang);
-      return res.status(404).json({ message: "Resume not found." });
-    }
-
-    console.log('Found resume URL:', resume.path);
-
-    // Just return the URL for testing
-    res.json({
-      message: "Resume found",
-      downloadUrl: resume.path,
-      suggestedUrl: resume.path.replace(
-        /\/upload\//,
-        `/upload/fl_attachment:Alireza-Tahavori-Resume-${lang}.pdf/`
-      )
-    });
-
-  } catch (error) {
-    console.error("Download error:", error);
-    
-    if (error instanceof Error) {
-      console.error("Error details:", error.message, error.stack);
-    }
-    
-    res.status(500).json({ 
-      message: "Failed to download resume",
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
+    res.redirect(resume.path); // ✅ use `path` field
+  } catch (err) {
+    console.error("Error downloading resume:", err);
+    res.status(500).send("Failed to download resume.");
   }
 };
