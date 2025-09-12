@@ -45,7 +45,8 @@ export const uploadResume = async (req: Request, res: Response) => {
   }
 };
 
-// Updated downloadResume controller - using axios instead of fetch
+
+// Alternative downloadResume controller using https module
 export const downloadResume = async (req: Request, res: Response) => {
   try {
     const lang = req.query.lang as string;
@@ -62,16 +63,28 @@ export const downloadResume = async (req: Request, res: Response) => {
       `attachment; filename="${resume.filename || `resume-${lang}.pdf`}"`
     );
 
-    // Use axios to get the file from Cloudinary
-    const axios = require('axios');
-    const response = await axios({
-      method: 'GET',
-      url: resume.path,
-      responseType: 'stream'
+    // Use native https module to fetch the file
+    const https = require('https');
+    const url = require('url');
+    
+    const parsedUrl = url.parse(resume.path);
+    const options = {
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.path,
+      method: 'GET'
+    };
+
+    const request = https.request(options, (response: any) => {
+      // Pipe the response directly to the Express response
+      response.pipe(res);
     });
 
-    // Pipe the response stream to the Express response
-    response.data.pipe(res);
+    request.on('error', (err: any) => {
+      console.error("Error downloading file from Cloudinary:", err);
+      res.status(500).send("Failed to download file.");
+    });
+
+    request.end();
   } catch (err) {
     console.error("Error downloading resume:", err);
     res.status(500).send("Failed to download resume.");
