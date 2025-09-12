@@ -9,13 +9,14 @@ const storage = new CloudinaryStorage({
     const isPdf = file.mimetype === "application/pdf";
     return {
       folder: "portfolio_uploads",
-      resource_type: isPdf ? "raw" : "auto",
+      resource_type: isPdf ? "raw" : "auto", // <--- must be "raw" for PDF
       public_id: `${file.fieldname}-${Date.now()}-${Math.round(
         Math.random() * 1e9
       )}`,
     };
   },
 });
+
 
 export const upload = multer({
   storage,

@@ -21,8 +21,15 @@ export const uploadResume = async (req: Request, res: Response) => {
 
     // Cloudinary gives us both public_id and path (url)
     const cloudinaryFile = req.file as any;
-    const fileUrl = cloudinaryFile.path; // public URL
     const fileName = cloudinaryFile.filename || cloudinaryFile.originalname;
+
+    let fileUrl = "";
+    if (cloudinaryFile.resource_type === "raw") {
+      fileUrl = cloudinaryFile.secure_url; // raw files
+    } else {
+      fileUrl = cloudinaryFile.path || cloudinaryFile.secure_url; // images/videos
+    }
+
 
     await prisma.resume.upsert({
       where: { lang },
